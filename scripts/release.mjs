@@ -26,8 +26,8 @@ const COMPONENTS = {
     buildCmd: 'bun run build:release',
     artifacts: ['dist/universal.zip'],
     postReleaseHint: null,
-    tweetHeader: (v) => `Impeccable v${v} is out.`,
-    tweetCta: 'Install / update: npx impeccable install',
+    tweetHeader: (v) => `Design Doctor v${v} is out.`,
+    tweetCta: 'Install / update: npx design-doctor install',
   },
   cli: {
     manifest: 'package.json',
@@ -37,8 +37,8 @@ const COMPONENTS = {
     buildCmd: null,
     artifacts: [],
     postReleaseHint: 'Run `npm publish` next to push the package to the npm registry.',
-    tweetHeader: (v) => `Impeccable CLI v${v} is out.`,
-    tweetCta: 'npm i -g impeccable',
+    tweetHeader: (v) => `Design Doctor CLI v${v} is out.`,
+    tweetCta: 'npm i -g design-doctor',
   },
   extension: {
     manifest: 'extension/manifest.json',
@@ -49,12 +49,12 @@ const COMPONENTS = {
     artifacts: ['dist/extension.zip', 'dist/extension-firefox.zip'],
     postReleaseHint:
       'Upload `dist/extension.zip` to the Chrome Web Store dashboard, and `dist/extension-firefox.zip` to addons.mozilla.org (AMO), to publish.',
-    tweetHeader: (v) => `Impeccable browser extension v${v} is out.`,
+    tweetHeader: (v) => `Design Doctor browser extension v${v} is out.`,
     tweetCta: null,
   },
 };
 
-const REPO_URL = 'https://github.com/pbakaus/impeccable';
+const REPO_URL = 'https://github.com/git-dann/impeccable';
 const TWEET_LIMIT = 280;
 
 const args = process.argv.slice(2);
@@ -210,7 +210,7 @@ if (cfg.postReleaseHint) {
 }
 
 const tweet = renderTweet(cfg, version, entryHtml, tag);
-console.log(`\n--- Tweet (${tweet.length}/${TWEET_LIMIT} chars) for @impeccable_ai ---`);
+console.log(`\n--- Tweet (${tweet.length}/${TWEET_LIMIT} chars) for @design_doctor_ai ---`);
 console.log(tweet);
 console.log('--- end tweet ---');
 

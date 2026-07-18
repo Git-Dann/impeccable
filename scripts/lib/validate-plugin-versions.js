@@ -13,9 +13,9 @@
  *   - `plugin/.claude-plugin/plugin.json` version — generated, derived from
  *     root at build:release; checked so a bump that forgets to regenerate the
  *     subtree fails loudly instead of merging a drift window onto main.
- *   - `plugin/skills/impeccable/SKILL.md` frontmatter version — generated;
+ *   - `plugin/skills/design-doctor/SKILL.md` frontmatter version — generated;
  *     same rationale.
- *   - `dist/openai/impeccable/.codex-plugin/plugin.json` version — generated
+ *   - `dist/openai/design-doctor/.codex-plugin/plugin.json` version — generated
  *     for public OpenAI submission and checked when that build output exists.
  *
  * The collector is pure (filesystem-in, data-out) so it can be unit-tested
@@ -99,11 +99,11 @@ export function collectPluginVersions(rootDir) {
       read: (raw) => JSON.parse(raw).version,
     },
     {
-      relPath: 'dist/openai/impeccable/.codex-plugin/plugin.json',
+      relPath: 'dist/openai/design-doctor/.codex-plugin/plugin.json',
       read: (raw) => JSON.parse(raw).version,
     },
     {
-      relPath: 'plugin/skills/impeccable/SKILL.md',
+      relPath: 'plugin/skills/design-doctor/SKILL.md',
       read: (raw) => readSkillFrontmatterVersion(raw),
     },
   ];

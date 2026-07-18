@@ -54,10 +54,10 @@ describe('live browser script parts', () => {
       ],
     });
 
-    const tokenIndex = script.indexOf('window.__IMPECCABLE_TOKEN__');
-    const portIndex = script.indexOf('window.__IMPECCABLE_PORT__');
-    const commandPrefixIndex = script.indexOf('window.__IMPECCABLE_COMMAND_PREFIX__');
-    const vocabIndex = script.indexOf('window.__IMPECCABLE_VOCAB__');
+    const tokenIndex = script.indexOf('window.__DESIGN_DOCTOR_TOKEN__');
+    const portIndex = script.indexOf('window.__DESIGN_DOCTOR_PORT__');
+    const commandPrefixIndex = script.indexOf('window.__DESIGN_DOCTOR_COMMAND_PREFIX__');
+    const vocabIndex = script.indexOf('window.__DESIGN_DOCTOR_VOCAB__');
     const sessionIndex = script.indexOf('window.__SESSION_PART__');
     const domIndex = script.indexOf('window.__DOM_PART__');
     const browserIndex = script.indexOf('window.__BROWSER_PART__');
@@ -66,12 +66,12 @@ describe('live browser script parts', () => {
     assert.ok(tokenIndex < portIndex);
     assert.ok(portIndex < commandPrefixIndex);
     assert.ok(commandPrefixIndex < vocabIndex);
-    assert.match(script, /window\.__IMPECCABLE_COMMAND_PREFIX__ = "\$"/);
+    assert.match(script, /window\.__DESIGN_DOCTOR_COMMAND_PREFIX__ = "\$"/);
     assert.ok(vocabIndex < sessionIndex);
     assert.ok(sessionIndex < domIndex);
     assert.ok(domIndex < browserIndex);
-    assert.match(script, /impeccable live script part: session-state \(live-browser-session\.js\)/);
-    assert.match(script, /impeccable live script part: dom-helpers \(live-browser-dom\.js\)/);
-    assert.match(script, /impeccable live script part: browser-ui \(live-browser\.js\)/);
+    assert.match(script, /design-doctor live script part: session-state \(live-browser-session\.js\)/);
+    assert.match(script, /design-doctor live script part: dom-helpers \(live-browser-dom\.js\)/);
+    assert.match(script, /design-doctor live script part: browser-ui \(live-browser\.js\)/);
   });
 });

@@ -38,23 +38,23 @@ const selectedProviders = (args.providers || defaultProviders.join(','))
   .split(',')
   .map((provider) => provider.trim().toLowerCase())
   .filter(Boolean);
-const smokeDir = join(targetRepo, '.impeccable', 'provider-smoke');
+const smokeDir = join(targetRepo, '.design-doctor', 'provider-smoke');
 const summaryPath = join(smokeDir, 'summary.json');
 const smokeFiles = {
-  direct: 'src/__impeccable_provider_smoke_direct.html',
-  claude: 'src/__impeccable_provider_smoke_claude.html',
-  codex: 'src/__impeccable_provider_smoke_codex.html',
-  cursor: 'src/__impeccable_provider_smoke_cursor.html',
-  confirmedClaude: 'src/__impeccable_provider_smoke_confirmed_claude.html',
-  confirmedCodex: 'src/__impeccable_provider_smoke_confirmed_codex.html',
-  confirmedCursor: 'src/__impeccable_provider_smoke_confirmed_cursor.html',
-  agentChoiceClaude: 'src/__impeccable_provider_smoke_font_choice_claude.html',
-  agentChoiceCodex: 'src/__impeccable_provider_smoke_font_choice_codex.html',
-  agentChoiceCursor: 'src/__impeccable_provider_smoke_font_choice_cursor.html',
+  direct: 'src/__design_doctor_provider_smoke_direct.html',
+  claude: 'src/__design_doctor_provider_smoke_claude.html',
+  codex: 'src/__design_doctor_provider_smoke_codex.html',
+  cursor: 'src/__design_doctor_provider_smoke_cursor.html',
+  confirmedClaude: 'src/__design_doctor_provider_smoke_confirmed_claude.html',
+  confirmedCodex: 'src/__design_doctor_provider_smoke_confirmed_codex.html',
+  confirmedCursor: 'src/__design_doctor_provider_smoke_confirmed_cursor.html',
+  agentChoiceClaude: 'src/__design_doctor_provider_smoke_font_choice_claude.html',
+  agentChoiceCodex: 'src/__design_doctor_provider_smoke_font_choice_codex.html',
+  agentChoiceCursor: 'src/__design_doctor_provider_smoke_font_choice_cursor.html',
 };
 
 const results = [];
-const hookConfigFiles = ['.impeccable/config.json', '.impeccable/config.local.json'];
+const hookConfigFiles = ['.design-doctor/config.json', '.design-doctor/config.local.json'];
 const originalHookConfigFiles = new Map();
 
 main().catch((error) => {
@@ -192,8 +192,8 @@ function shellQuote(value) {
 }
 
 async function reinstallFresh() {
-  cleanInstalledImpeccable();
-  const packDir = makeTempDir('impeccable-provider-smoke-pack-');
+  cleanInstalledDesignDoctor();
+  const packDir = makeTempDir('design-doctor-provider-smoke-pack-');
   const pack = run('npm', ['pack', '--pack-destination', packDir], {
     cwd: prRoot,
     logName: 'npm-pack.log',
@@ -203,20 +203,20 @@ async function reinstallFresh() {
   const tarball = join(packDir, packName);
   assertPath(tarball, 'local npm tarball');
 
-  const env = { IMPECCABLE_BUNDLE_PATH: bundlePath };
-  run('npx', ['--yes', '--package', tarball, 'impeccable', 'skills', 'install', '-y', '--force', '--providers=claude,cursor,codex'], {
+  const env = { DESIGN_DOCTOR_BUNDLE_PATH: bundlePath };
+  run('npx', ['--yes', '--package', tarball, 'design-doctor', 'skills', 'install', '-y', '--force', '--providers=claude,cursor,codex'], {
     cwd: targetRepo,
     env,
     logName: 'skills-install.log',
     timeoutMs: 5 * 60 * 1000,
   });
-  run('npx', ['--yes', '--package', tarball, 'impeccable', 'skills', 'update', '-y'], {
+  run('npx', ['--yes', '--package', tarball, 'design-doctor', 'skills', 'update', '-y'], {
     cwd: targetRepo,
     env,
     logName: 'skills-update.log',
     timeoutMs: 5 * 60 * 1000,
   });
-  record('fresh install/update', true, 'installed through local npx + IMPECCABLE_BUNDLE_PATH');
+  record('fresh install/update', true, 'installed through local npx + DESIGN_DOCTOR_BUNDLE_PATH');
 }
 
 function makeTempDir(prefix) {
@@ -225,19 +225,19 @@ function makeTempDir(prefix) {
   return dir;
 }
 
-function cleanInstalledImpeccable() {
+function cleanInstalledDesignDoctor() {
   clearRuntimeState();
   cleanSmokeFiles();
 
   for (const rel of [
-    '.claude/skills/impeccable',
-    '.cursor/skills/impeccable',
-    '.agents/skills/impeccable',
+    '.claude/skills/design-doctor',
+    '.cursor/skills/design-doctor',
+    '.agents/skills/design-doctor',
     '.claude/hooks/hooks.json',
     '.agents/hooks',
     '.agents/plugins/marketplace.json',
     '.cursor/pre-log.mjs',
-    '.cursor/rules/impeccable-design-hook.mdc',
+    '.cursor/rules/design-doctor-design-hook.mdc',
     'plugin-codex',
   ]) {
     rmSync(join(targetRepo, rel), { recursive: true, force: true });
@@ -247,25 +247,25 @@ function cleanInstalledImpeccable() {
     stripManifest(rel);
   }
 
-  run('claude', ['plugin', 'uninstall', 'impeccable@impeccable', '--scope', 'user'], {
+  run('claude', ['plugin', 'uninstall', 'design-doctor@design-doctor', '--scope', 'user'], {
     cwd: targetRepo,
     logName: 'claude-plugin-uninstall.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('claude', ['plugin', 'marketplace', 'remove', 'impeccable', '--scope', 'user'], {
+  run('claude', ['plugin', 'marketplace', 'remove', 'design-doctor', '--scope', 'user'], {
     cwd: targetRepo,
     logName: 'claude-marketplace-remove.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('codex', ['plugin', 'remove', 'impeccable@impeccable'], {
+  run('codex', ['plugin', 'remove', 'design-doctor@design-doctor'], {
     cwd: targetRepo,
     logName: 'codex-plugin-remove.log',
     allowFailure: true,
     timeoutMs: 60 * 1000,
   });
-  run('codex', ['plugin', 'marketplace', 'remove', 'impeccable'], {
+  run('codex', ['plugin', 'marketplace', 'remove', 'design-doctor'], {
     cwd: targetRepo,
     logName: 'codex-marketplace-remove.log',
     allowFailure: true,
@@ -273,10 +273,10 @@ function cleanInstalledImpeccable() {
   });
 
   for (const abs of [
-    join(homedir(), '.claude/plugins/cache/impeccable'),
-    join(homedir(), '.claude/plugins/data/impeccable-impeccable'),
-    join(homedir(), '.codex/plugins/cache/impeccable'),
-    join(homedir(), '.codex/plugins/data/impeccable-impeccable'),
+    join(homedir(), '.claude/plugins/cache/design-doctor'),
+    join(homedir(), '.claude/plugins/data/design-doctor-design-doctor'),
+    join(homedir(), '.codex/plugins/cache/design-doctor'),
+    join(homedir(), '.codex/plugins/data/design-doctor-design-doctor'),
   ]) {
     rmSync(abs, { recursive: true, force: true });
   }
@@ -286,14 +286,14 @@ function ensureTargetGitExclude() {
   const excludePath = join(targetRepo, '.git', 'info', 'exclude');
   if (!existsSync(dirname(excludePath))) return;
   const block = [
-    '# impeccable-provider-smoke-start',
-    '.impeccable/provider-smoke/',
-    'src/__impeccable_provider_smoke_*.html',
-    '# impeccable-provider-smoke-end',
+    '# design-doctor-provider-smoke-start',
+    '.design-doctor/provider-smoke/',
+    'src/__design_doctor_provider_smoke_*.html',
+    '# design-doctor-provider-smoke-end',
   ].join('\n');
   const current = readMaybe(excludePath);
-  const next = current.includes('# impeccable-provider-smoke-start')
-    ? current.replace(/# impeccable-provider-smoke-start[\s\S]*?# impeccable-provider-smoke-end/g, block)
+  const next = current.includes('# design-doctor-provider-smoke-start')
+    ? current.replace(/# design-doctor-provider-smoke-start[\s\S]*?# design-doctor-provider-smoke-end/g, block)
     : `${current.replace(/\s*$/, '')}\n${block}\n`;
   if (next !== current) writeFileSync(excludePath, next);
 }
@@ -312,7 +312,7 @@ function stripManifest(rel) {
   const nextHooks = {};
   for (const [event, entries] of Object.entries(hooks)) {
     const preserved = Array.isArray(entries)
-      ? entries.map(stripImpeccableHookEntry).filter(Boolean)
+      ? entries.map(stripDesignDoctorHookEntry).filter(Boolean)
       : entries;
     if (Array.isArray(preserved) ? preserved.length > 0 : Boolean(preserved)) nextHooks[event] = preserved;
   }
@@ -365,21 +365,21 @@ function resetHookConfigForSmoke() {
   }
 }
 
-function stripImpeccableHookEntry(entry) {
+function stripDesignDoctorHookEntry(entry) {
   if (!entry || typeof entry !== 'object') return entry;
-  if (containsImpeccableHook(entry)) return null;
+  if (containsDesignDoctorHook(entry)) return null;
   if (Array.isArray(entry.hooks)) {
-    const hooks = entry.hooks.map(stripImpeccableHookEntry).filter(Boolean);
-    if (hooks.length === 0 && entry.hooks.some(containsImpeccableHook)) return null;
+    const hooks = entry.hooks.map(stripDesignDoctorHookEntry).filter(Boolean);
+    if (hooks.length === 0 && entry.hooks.some(containsDesignDoctorHook)) return null;
     return { ...entry, hooks };
   }
   return entry;
 }
 
-function containsImpeccableHook(value) {
-  if (typeof value === 'string') return value.includes('skills/impeccable/scripts/hook') || value.includes('.cursor/pre-log.mjs');
-  if (Array.isArray(value)) return value.some(containsImpeccableHook);
-  if (value && typeof value === 'object') return Object.values(value).some(containsImpeccableHook);
+function containsDesignDoctorHook(value) {
+  if (typeof value === 'string') return value.includes('skills/design-doctor/scripts/hook') || value.includes('.cursor/pre-log.mjs');
+  if (Array.isArray(value)) return value.some(containsDesignDoctorHook);
+  if (value && typeof value === 'object') return Object.values(value).some(containsDesignDoctorHook);
   return false;
 }
 
@@ -387,30 +387,30 @@ function verifyInstallShape() {
   const claude = readText('.claude/settings.local.json');
   const codex = readText('.codex/hooks.json');
   const cursor = readText('.cursor/hooks.json');
-  assertCount(claude, '.claude/skills/impeccable/scripts/hook.mjs', 1, 'Claude hook.mjs');
-  assertCount(codex, '.agents/skills/impeccable/scripts/hook.mjs', 1, 'Codex hook.mjs');
-  assertCount(cursor, '.cursor/skills/impeccable/scripts/hook-before-edit.mjs', 1, 'Cursor preToolUse');
-  assertCount(cursor, '.cursor/skills/impeccable/scripts/hook-after-edit.mjs', 0, 'Cursor afterFileEdit');
-  assertCount(cursor, '.cursor/skills/impeccable/scripts/hook-stop.mjs', 0, 'Cursor stop');
+  assertCount(claude, '.claude/skills/design-doctor/scripts/hook.mjs', 1, 'Claude hook.mjs');
+  assertCount(codex, '.agents/skills/design-doctor/scripts/hook.mjs', 1, 'Codex hook.mjs');
+  assertCount(cursor, '.cursor/skills/design-doctor/scripts/hook-before-edit.mjs', 1, 'Cursor preToolUse');
+  assertCount(cursor, '.cursor/skills/design-doctor/scripts/hook-after-edit.mjs', 0, 'Cursor afterFileEdit');
+  assertCount(cursor, '.cursor/skills/design-doctor/scripts/hook-stop.mjs', 0, 'Cursor stop');
   for (const text of [claude, codex, cursor]) {
     if (text.includes('hook-probe.mjs')) throw new Error('hook-probe.mjs still appears in hook manifests');
   }
   for (const rel of [
-    '.claude/skills/impeccable/scripts/hook.mjs',
-    '.claude/skills/impeccable/scripts/hook-lib.mjs',
-    '.claude/skills/impeccable/scripts/detector/cli/main.mjs',
-    '.agents/skills/impeccable/scripts/hook.mjs',
-    '.agents/skills/impeccable/scripts/hook-lib.mjs',
-    '.agents/skills/impeccable/scripts/detector/cli/main.mjs',
-    '.cursor/skills/impeccable/scripts/hook-before-edit.mjs',
-    '.cursor/skills/impeccable/scripts/hook-lib.mjs',
-    '.cursor/skills/impeccable/scripts/detector/cli/main.mjs',
+    '.claude/skills/design-doctor/scripts/hook.mjs',
+    '.claude/skills/design-doctor/scripts/hook-lib.mjs',
+    '.claude/skills/design-doctor/scripts/detector/cli/main.mjs',
+    '.agents/skills/design-doctor/scripts/hook.mjs',
+    '.agents/skills/design-doctor/scripts/hook-lib.mjs',
+    '.agents/skills/design-doctor/scripts/detector/cli/main.mjs',
+    '.cursor/skills/design-doctor/scripts/hook-before-edit.mjs',
+    '.cursor/skills/design-doctor/scripts/hook-lib.mjs',
+    '.cursor/skills/design-doctor/scripts/detector/cli/main.mjs',
   ]) {
     assertPath(join(targetRepo, rel), rel);
   }
   for (const rel of [
-    '.cursor/skills/impeccable/scripts/hook-after-edit.mjs',
-    '.cursor/skills/impeccable/scripts/hook-stop.mjs',
+    '.cursor/skills/design-doctor/scripts/hook-after-edit.mjs',
+    '.cursor/skills/design-doctor/scripts/hook-stop.mjs',
   ]) {
     if (existsSync(join(targetRepo, rel))) throw new Error(`${rel} should not exist in Cursor payload`);
   }
@@ -458,8 +458,8 @@ function assertNoPluginInstall() {
     ['Codex plugin list', `${codex.stdout}\n${codex.stderr}`],
     ['Codex marketplace list', `${codexMarket.stdout}\n${codexMarket.stderr}`],
   ]) {
-    if (/impeccable@impeccable|Marketplace `impeccable`|impeccable-design-hook-impl/.test(text)) {
-      throw new Error(`${name} still contains Impeccable plugin install`);
+    if (/design-doctor@design-doctor|Marketplace `design-doctor`|design-doctor-design-hook-impl/.test(text)) {
+      throw new Error(`${name} still contains Design Doctor plugin install`);
     }
   }
 }
@@ -467,8 +467,8 @@ function assertNoPluginInstall() {
 function runDirectContractChecks() {
   clearRuntimeState();
   const file = writeBadFixture(smokeFiles.direct);
-  const env = { IMPECCABLE_HOOK_LOG: join(smokeDir, 'direct.ndjson') };
-  const claude = run('node', ['.claude/skills/impeccable/scripts/hook.mjs'], {
+  const env = { DESIGN_DOCTOR_HOOK_LOG: join(smokeDir, 'direct.ndjson') };
+  const claude = run('node', ['.claude/skills/design-doctor/scripts/hook.mjs'], {
     cwd: targetRepo,
     env,
     logName: 'direct-claude.log',
@@ -477,7 +477,7 @@ function runDirectContractChecks() {
   requireFinding('direct Claude hook', `${claude.stdout}\n${readMaybe(join(smokeDir, 'direct.ndjson'))}`);
 
   clearRuntimeState();
-  const codex = run('node', ['.agents/skills/impeccable/scripts/hook.mjs'], {
+  const codex = run('node', ['.agents/skills/design-doctor/scripts/hook.mjs'], {
     cwd: targetRepo,
     env,
     logName: 'direct-codex.log',
@@ -486,7 +486,7 @@ function runDirectContractChecks() {
   requireFinding('direct Codex hook', `${codex.stdout}\n${readMaybe(join(smokeDir, 'direct.ndjson'))}`);
 
   clearRuntimeState();
-  const pre = run('node', ['.cursor/skills/impeccable/scripts/hook-before-edit.mjs'], {
+  const pre = run('node', ['.cursor/skills/design-doctor/scripts/hook-before-edit.mjs'], {
     cwd: targetRepo,
     env,
     logName: 'direct-cursor-before.log',
@@ -689,7 +689,7 @@ function assertSpecificFontIgnoreConfig(provider, config) {
 }
 
 function assertNoSpecificFontIgnoreConfig(provider) {
-  const file = join(targetRepo, '.impeccable', 'config.json');
+  const file = join(targetRepo, '.design-doctor', 'config.json');
   if (!existsSync(file)) return;
   const raw = readJson(file);
   const config = raw && typeof raw === 'object' && !Array.isArray(raw) && raw.hook && typeof raw.hook === 'object'
@@ -705,17 +705,17 @@ function assertNoSpecificFontIgnoreConfig(provider) {
 }
 
 function readSharedHookConfig() {
-  const raw = readJson(join(targetRepo, '.impeccable', 'config.json'));
+  const raw = readJson(join(targetRepo, '.design-doctor', 'config.json'));
   if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !raw.hook || typeof raw.hook !== 'object') {
-    throw new Error('Missing .impeccable/config.json hook config');
+    throw new Error('Missing .design-doctor/config.json hook config');
   }
   return raw.hook;
 }
 
 function runInstalledProviderHook(provider, file, logName) {
-  const env = { IMPECCABLE_HOOK_LOG: join(smokeDir, logName) };
+  const env = { DESIGN_DOCTOR_HOOK_LOG: join(smokeDir, logName) };
   if (provider === 'claude') {
-    return run('node', ['.claude/skills/impeccable/scripts/hook.mjs'], {
+    return run('node', ['.claude/skills/design-doctor/scripts/hook.mjs'], {
       cwd: targetRepo,
       env,
       logName: `direct-${provider}-confirmed-${logName.replace(/\.ndjson$/, '.log')}`,
@@ -723,7 +723,7 @@ function runInstalledProviderHook(provider, file, logName) {
     });
   }
   if (provider === 'codex') {
-    return run('node', ['.agents/skills/impeccable/scripts/hook.mjs'], {
+    return run('node', ['.agents/skills/design-doctor/scripts/hook.mjs'], {
       cwd: targetRepo,
       env,
       logName: `direct-${provider}-confirmed-${logName.replace(/\.ndjson$/, '.log')}`,
@@ -731,7 +731,7 @@ function runInstalledProviderHook(provider, file, logName) {
     });
   }
   if (provider === 'cursor') {
-    return run('node', ['.cursor/skills/impeccable/scripts/hook-before-edit.mjs'], {
+    return run('node', ['.cursor/skills/design-doctor/scripts/hook-before-edit.mjs'], {
       cwd: targetRepo,
       env,
       logName: `direct-${provider}-confirmed-${logName.replace(/\.ndjson$/, '.log')}`,
@@ -764,15 +764,15 @@ function agentChoiceSmokeFile(provider) {
 }
 
 function providerAdminScript(provider) {
-  if (provider === 'claude') return '.claude/skills/impeccable/scripts/hook-admin.mjs';
-  if (provider === 'codex') return '.agents/skills/impeccable/scripts/hook-admin.mjs';
-  if (provider === 'cursor') return '.cursor/skills/impeccable/scripts/hook-admin.mjs';
+  if (provider === 'claude') return '.claude/skills/design-doctor/scripts/hook-admin.mjs';
+  if (provider === 'codex') return '.agents/skills/design-doctor/scripts/hook-admin.mjs';
+  if (provider === 'cursor') return '.cursor/skills/design-doctor/scripts/hook-admin.mjs';
   throw new Error(`Unsupported admin provider: ${provider}`);
 }
 
 function runClaudeProviderSmoke() {
   clearRuntimeState();
-  const env = { IMPECCABLE_HOOK_LOG: join(smokeDir, 'claude.ndjson') };
+  const env = { DESIGN_DOCTOR_HOOK_LOG: join(smokeDir, 'claude.ndjson') };
   const prompt = providerPrompt(smokeFiles.claude);
   const res = run('claude', [
     '-p',
@@ -798,7 +798,7 @@ function runClaudeProviderSmoke() {
 
 function runCodexProviderSmoke() {
   clearRuntimeState();
-  const env = { IMPECCABLE_HOOK_LOG: join(smokeDir, 'codex.ndjson') };
+  const env = { DESIGN_DOCTOR_HOOK_LOG: join(smokeDir, 'codex.ndjson') };
   const prompt = `Use apply_patch to ${providerPrompt(smokeFiles.codex)}`;
   const res = run('codex', [
     'exec',
@@ -814,7 +814,7 @@ function runCodexProviderSmoke() {
     timeoutMs: 10 * 60 * 1000,
   });
   const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'codex.ndjson'))}`;
-  const cacheEvidence = `${readMaybe(join(targetRepo, '.impeccable', 'hook.cache.json'))}\n${readMaybe(join(targetRepo, '.impeccable', 'hook.pending.json'))}`;
+  const cacheEvidence = `${readMaybe(join(targetRepo, '.design-doctor', 'hook.cache.json'))}\n${readMaybe(join(targetRepo, '.design-doctor', 'hook.pending.json'))}`;
   requireFile(smokeFiles.codex, 'Codex provider fixture');
   requireFinding('Codex provider hook', `${evidence}\n${cacheEvidence}`);
   record('codex provider', true, 'Codex apply_patch triggered project hook and side-tab detection');
@@ -823,7 +823,7 @@ function runCodexProviderSmoke() {
 function runCursorProviderSmoke() {
   ensureCursorAgent();
   clearRuntimeState();
-  const env = { IMPECCABLE_HOOK_LOG: join(smokeDir, 'cursor.ndjson') };
+  const env = { DESIGN_DOCTOR_HOOK_LOG: join(smokeDir, 'cursor.ndjson') };
   const prompt = providerPrompt(smokeFiles.cursor);
   const res = run('agent', [
     '-p',
@@ -848,7 +848,7 @@ function runCursorProviderSmoke() {
     }
     throw new Error(res.error ? `agent failed: ${res.error.message}` : `agent exited ${res.status}`);
   }
-  const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'cursor.ndjson'))}\n${readMaybe(join(targetRepo, '.impeccable', 'hook.pending.json'))}\n${readMaybe(join(targetRepo, '.impeccable', 'hook.cache.json'))}`;
+  const evidence = `${res.stdout}\n${res.stderr}\n${readMaybe(join(smokeDir, 'cursor.ndjson'))}\n${readMaybe(join(targetRepo, '.design-doctor', 'hook.pending.json'))}\n${readMaybe(join(targetRepo, '.design-doctor', 'hook.cache.json'))}`;
   requireFinding('Cursor provider hook', evidence);
   const auditEvents = readAuditEvents(join(smokeDir, 'cursor.ndjson'));
   if (!auditEvents.some((event) => event.event === 'preToolUse' && event.blocked === true)) {
@@ -864,7 +864,7 @@ function runCursorProviderSmoke() {
     const fixtureContent = readFileSync(fixturePath, 'utf8');
     if (/border-left\s*:\s*[2-9]\d*px/i.test(fixtureContent)) {
       if (!intentionalIgnore || !/ignoreFiles|ignore-file/i.test(evidence)) {
-        throw new Error('Cursor provider left the blocked side-tab fixture on disk without an explicit Impeccable ignore-file escape hatch');
+        throw new Error('Cursor provider left the blocked side-tab fixture on disk without an explicit Design Doctor ignore-file escape hatch');
       }
     }
   }
@@ -918,7 +918,7 @@ function badFixtureContent() {
     '        padding: 16px;',
     '      }',
     '    </style>',
-    '    <div class="card">Temporary Impeccable provider smoke fixture</div>',
+    '    <div class="card">Temporary Design Doctor provider smoke fixture</div>',
     '  </body>',
     '</html>',
     '',
@@ -931,11 +931,11 @@ function confirmedFixtureContent() {
     '<html>',
     '  <body>',
     '    <style>',
-    '      /* impeccable: ignore overused-font */',
+    '      /* design-doctor: ignore overused-font */',
     '      body { font-family: "Roboto", ui-sans-serif, system-ui, sans-serif; }',
     '      .card { border-radius: 16px; padding: 16px; }',
     '    </style>',
-    '    <div class="card">Temporary Impeccable confirmed exception fixture using Roboto.</div>',
+    '    <div class="card">Temporary Design Doctor confirmed exception fixture using Roboto.</div>',
     '  </body>',
     '</html>',
     '',
@@ -944,7 +944,7 @@ function confirmedFixtureContent() {
 
 function providerPrompt(rel) {
   return [
-    `Create ${rel} as an intentionally bad Impeccable hook test fixture.`,
+    `Create ${rel} as an intentionally bad Design Doctor hook test fixture.`,
     'The file must be HTML and include a rounded card with exactly this CSS pattern: border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px.',
     'This is intentionally bad UI for hook verification, so do not fix or remove the side border if a hook warns about it.',
     'After creating the file, stop.',
@@ -953,9 +953,9 @@ function providerPrompt(rel) {
 
 function fontExceptionPrompt(provider, rel) {
   return [
-    `Read the installed Impeccable hooks reference for ${provider}, then persist a confirmed hook exception for Roboto specifically in ${rel}.`,
+    `Read the installed Design Doctor hooks reference for ${provider}, then persist a confirmed hook exception for Roboto specifically in ${rel}.`,
     'The user confirms Roboto is intentional for this fixture, but did not ask to ignore overused fonts generally.',
-    'Use the /impeccable hooks / hook-admin flow; do not edit .impeccable/config.json by hand and do not edit the source fixture.',
+    'Use the /design-doctor hooks / hook-admin flow; do not edit .design-doctor/config.json by hand and do not edit the source fixture.',
     'The final config must use ignoreValues for overused-font=roboto and must not add overused-font to ignoreRules.',
     'After updating the config, stop.',
   ].join(' ');
@@ -1025,10 +1025,10 @@ function cleanSmokeFiles() {
 function clearRuntimeState() {
   resetHookConfigForSmoke();
   for (const rel of [
-    '.impeccable/hook.cache.json',
-    '.impeccable/hook.pending.json',
-    '.impeccable/hook.json',
-    '.impeccable/hook.local.json',
+    '.design-doctor/hook.cache.json',
+    '.design-doctor/hook.pending.json',
+    '.design-doctor/hook.json',
+    '.design-doctor/hook.local.json',
   ]) {
     rmSync(join(targetRepo, rel), { force: true });
   }
@@ -1036,8 +1036,8 @@ function clearRuntimeState() {
 
 function clearTransientHookState() {
   for (const rel of [
-    '.impeccable/hook.cache.json',
-    '.impeccable/hook.pending.json',
+    '.design-doctor/hook.cache.json',
+    '.design-doctor/hook.pending.json',
   ]) {
     rmSync(join(targetRepo, rel), { force: true });
   }

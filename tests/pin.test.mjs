@@ -12,10 +12,10 @@ describe('pin command provider syntax', () => {
   let project;
 
   beforeEach(() => {
-    project = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-pin-'));
+    project = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-pin-'));
     fs.writeFileSync(path.join(project, 'package.json'), '{}\n');
     for (const harness of ['.claude', '.cursor', '.agents', '.codex']) {
-      fs.mkdirSync(path.join(project, harness, 'skills', 'impeccable'), { recursive: true });
+      fs.mkdirSync(path.join(project, harness, 'skills', 'design-doctor'), { recursive: true });
     }
   });
 
@@ -33,14 +33,14 @@ describe('pin command provider syntax', () => {
 
     for (const harness of ['.claude', '.cursor']) {
       const skill = fs.readFileSync(path.join(project, harness, 'skills', 'audit', 'SKILL.md'), 'utf8');
-      assert.match(skill, /\/impeccable audit/);
-      assert.doesNotMatch(skill, /\$impeccable audit/);
+      assert.match(skill, /\/design-doctor audit/);
+      assert.doesNotMatch(skill, /\$design-doctor audit/);
     }
 
     for (const harness of ['.agents', '.codex']) {
       const skill = fs.readFileSync(path.join(project, harness, 'skills', 'audit', 'SKILL.md'), 'utf8');
-      assert.match(skill, /\$impeccable audit/);
-      assert.doesNotMatch(skill, /\/impeccable audit/);
+      assert.match(skill, /\$design-doctor audit/);
+      assert.doesNotMatch(skill, /\/design-doctor audit/);
     }
   });
 });

@@ -1,6 +1,6 @@
 /**
  * Tests for context-signals.mjs — the signal gatherer behind the
- * context-aware bare `/impeccable` (no-argument) path.
+ * context-aware bare `/design-doctor` (no-argument) path.
  *
  * The script collects deterministic project signals and emits JSON; it does
  * not score or rank (the agent reasons over the raw signals). These tests
@@ -24,7 +24,7 @@ const SCRIPT_PATH = path.join(
 
 let scratch;
 beforeEach(() => {
-  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-signals-'));
+  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-signals-'));
 });
 afterEach(() => {
   fs.rmSync(scratch, { recursive: true, force: true });
@@ -66,9 +66,9 @@ describe('gatherSignals', () => {
   });
 
   it('reads the newest critique snapshot score', async () => {
-    write('.impeccable/critique/2026-05-01T10-00-00Z__home.md',
+    write('.design-doctor/critique/2026-05-01T10-00-00Z__home.md',
       '---\nslug: home\nscore: 6\np0: 1\np1: 3\ntimestamp: 2026-05-01T10-00-00Z\n---\nbody\n');
-    write('.impeccable/critique/2026-05-02T10-00-00Z__home.md',
+    write('.design-doctor/critique/2026-05-02T10-00-00Z__home.md',
       '---\nslug: home\nscore: 8\np0: 0\np1: 1\ntimestamp: 2026-05-02T10-00-00Z\n---\nbody\n');
     const s = await gatherSignals(scratch);
     assert.equal(s.critique.latest.score, 8); // newest by timestamp prefix

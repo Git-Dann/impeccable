@@ -14,7 +14,7 @@ import {
   getLiveDir,
   getLiveServerPath,
   getLiveSessionsDir,
-} from '../skill/scripts/lib/impeccable-paths.mjs';
+} from '../skill/scripts/lib/design-doctor-paths.mjs';
 
 const REPO_ROOT = process.cwd();
 const SERVER_SCRIPT = join(REPO_ROOT, 'skill/scripts/live-server.mjs');
@@ -28,7 +28,7 @@ function startServer(port = 8499, { cwd = REPO_ROOT, env = {} } = {}) {
     const proc = spawn('node', [SERVER_SCRIPT, '--port=' + port], {
       cwd,
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, IMPECCABLE_LIVE_COPY_AGENT: 'off', ...env },
+      env: { ...process.env, DESIGN_DOCTOR_LIVE_COPY_AGENT: 'off', ...env },
     });
     let output = '';
     proc.stdout.on('data', (d) => {
@@ -93,22 +93,22 @@ async function stashManualEdit(server, entry) {
   return res.json();
 }
 
-it('gitignores local Impeccable runtime artifacts', () => {
+it('gitignores local Design Doctor runtime artifacts', () => {
   const ignored = execFileSync('git', [
     'check-ignore',
-    '.impeccable/live/manual-edit-apply-transaction.json',
-    '.impeccable/live/manual-edit-evidence/example.json',
-    '.impeccable/hook.cache.json',
-    '.impeccable/hook.pending.json',
-    '.impeccable/config.local.json',
-    '.impeccable/live/deferred-svelte-component-accepts.json',
+    '.design-doctor/live/manual-edit-apply-transaction.json',
+    '.design-doctor/live/manual-edit-evidence/example.json',
+    '.design-doctor/hook.cache.json',
+    '.design-doctor/hook.pending.json',
+    '.design-doctor/config.local.json',
+    '.design-doctor/live/deferred-svelte-component-accepts.json',
   ], { cwd: REPO_ROOT, encoding: 'utf-8' });
-  assert.match(ignored, /\.impeccable\/live\/manual-edit-apply-transaction\.json/);
-  assert.match(ignored, /\.impeccable\/live\/manual-edit-evidence\/example\.json/);
-  assert.match(ignored, /\.impeccable\/hook\.cache\.json/);
-  assert.match(ignored, /\.impeccable\/hook\.pending\.json/);
-  assert.match(ignored, /\.impeccable\/config\.local\.json/);
-  assert.match(ignored, /\.impeccable\/live\/deferred-svelte-component-accepts\.json/);
+  assert.match(ignored, /\.design-doctor\/live\/manual-edit-apply-transaction\.json/);
+  assert.match(ignored, /\.design-doctor\/live\/manual-edit-evidence\/example\.json/);
+  assert.match(ignored, /\.design-doctor\/hook\.cache\.json/);
+  assert.match(ignored, /\.design-doctor\/hook\.pending\.json/);
+  assert.match(ignored, /\.design-doctor\/config\.local\.json/);
+  assert.match(ignored, /\.design-doctor\/live\/deferred-svelte-component-accepts\.json/);
 });
 
 async function readSseUntil(reader, decoder, needle, maxReads = 12) {
@@ -132,12 +132,12 @@ describe('live-server integration', () => {
 
   before(async () => {
     // Run the shared server against an isolated tmpdir so journals/snapshots
-    // never land in the real repo's `.impeccable/live/sessions/`. Those would
+    // never land in the real repo's `.design-doctor/live/sessions/`. Those would
     // otherwise be replayed into the poll queue on the next real `live` run.
-    serverCwd = mkdtempSync(join(tmpdir(), 'impeccable-live-server-'));
+    serverCwd = mkdtempSync(join(tmpdir(), 'design-doctor-live-server-'));
     // The /source endpoint test below reads package.json from the server's
     // cwd, so seed a minimal one that contains the substring it asserts on.
-    writeFileSync(join(serverCwd, 'package.json'), JSON.stringify({ name: 'impeccable' }));
+    writeFileSync(join(serverCwd, 'package.json'), JSON.stringify({ name: 'design-doctor' }));
     server = await startServer(8499, { cwd: serverCwd });
   });
 
@@ -163,13 +163,13 @@ describe('live-server integration', () => {
   });
 
   it('/live.js injects the canonical command vocabulary', async () => {
-    // live-browser.js builds its action picker from window.__IMPECCABLE_VOCAB__
+    // live-browser.js builds its action picker from window.__DESIGN_DOCTOR_VOCAB__
     // rather than an inline copy, so the server must serialize the canonical
     // vocabulary into /live.js (next to the token/port).
     const { LIVE_COMMANDS } = await import('../skill/scripts/live/vocabulary.mjs');
     const body = await (await fetch(`http://localhost:${server.port}/live.js`)).text();
-    assert.match(body, /window\.__IMPECCABLE_VOCAB__\s*=/);
-    const injected = JSON.parse(body.match(/window\.__IMPECCABLE_VOCAB__\s*=\s*(\[.*?\]);/s)[1]);
+    assert.match(body, /window\.__DESIGN_DOCTOR_VOCAB__\s*=/);
+    const injected = JSON.parse(body.match(/window\.__DESIGN_DOCTOR_VOCAB__\s*=\s*(\[.*?\]);/s)[1]);
     assert.deepEqual(injected, LIVE_COMMANDS);
   });
 
@@ -182,7 +182,7 @@ describe('live-server integration', () => {
         token: server.token,
         type: 'generate',
         id: 'a1b2c3d5',
-        action: 'impeccable',
+        action: 'design-doctor',
         count: 1,
         pageUrl: '/',
         element: { outerHTML: '<button>Book</button>' },
@@ -229,16 +229,16 @@ describe('live-server integration', () => {
     assert.equal(res.status, 200);
     assert.equal(res.headers.get('content-type'), 'application/javascript');
     const text = await res.text();
-    assert.ok(text.includes('__IMPECCABLE_TOKEN__'));
+    assert.ok(text.includes('__DESIGN_DOCTOR_TOKEN__'));
     assert.ok(text.includes(server.token));
-    assert.ok(text.includes('__IMPECCABLE_PORT__'));
-    const preludeIndex = text.indexOf('window.__IMPECCABLE_VOCAB__');
-    const sessionPartIndex = text.indexOf('impeccable live script part: session-state (live-browser-session.js)');
-    const domPartIndex = text.indexOf('impeccable live script part: dom-helpers (live-browser-dom.js)');
-    const browserPartIndex = text.indexOf('impeccable live script part: browser-ui (live-browser.js)');
-    const sessionHelperIndex = text.indexOf('__IMPECCABLE_LIVE_SESSION__');
-    const domHelperIndex = text.indexOf('__IMPECCABLE_LIVE_DOM__');
-    const browserInitIndex = text.indexOf('__IMPECCABLE_LIVE_INIT__');
+    assert.ok(text.includes('__DESIGN_DOCTOR_PORT__'));
+    const preludeIndex = text.indexOf('window.__DESIGN_DOCTOR_VOCAB__');
+    const sessionPartIndex = text.indexOf('design-doctor live script part: session-state (live-browser-session.js)');
+    const domPartIndex = text.indexOf('design-doctor live script part: dom-helpers (live-browser-dom.js)');
+    const browserPartIndex = text.indexOf('design-doctor live script part: browser-ui (live-browser.js)');
+    const sessionHelperIndex = text.indexOf('__DESIGN_DOCTOR_LIVE_SESSION__');
+    const domHelperIndex = text.indexOf('__DESIGN_DOCTOR_LIVE_DOM__');
+    const browserInitIndex = text.indexOf('__DESIGN_DOCTOR_LIVE_INIT__');
     assert.ok(preludeIndex !== -1);
     assert.ok(sessionPartIndex !== -1);
     assert.ok(domPartIndex !== -1);
@@ -268,8 +268,8 @@ describe('live-server integration', () => {
     );
   });
 
-  it('/design-system.json reads DESIGN.md plus .impeccable/design.json', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-design-system-'));
+  it('/design-system.json reads DESIGN.md plus .design-doctor/design.json', async () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-design-system-'));
     let designServer;
     try {
       writeFileSync(join(tmp, 'DESIGN.md'), `---
@@ -281,7 +281,7 @@ colors: {}
 # Temp System
 `);
       const sidecarPath = getDesignSidecarPath(tmp);
-      mkdirSync(join(tmp, '.impeccable'), { recursive: true });
+      mkdirSync(join(tmp, '.design-doctor'), { recursive: true });
       writeFileSync(sidecarPath, JSON.stringify({ version: 2, source: 'new-sidecar' }));
 
       designServer = await startServer(8520, { cwd: tmp });
@@ -303,7 +303,7 @@ colors: {}
   });
 
   it('/design-system.json falls back to legacy root DESIGN.json', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-design-system-legacy-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-design-system-legacy-'));
     let designServer;
     try {
       writeFileSync(join(tmp, 'DESIGN.md'), `---
@@ -341,7 +341,7 @@ colors: {}
   });
 
   it('/manual-edit-commit runs the batched AI apply path and clears successful entries', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-server-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-server-'));
     let commitServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -351,9 +351,9 @@ colors: {}
       commitServer = await startServer(8522, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'mock',
-          IMPECCABLE_LIVE_COPY_AGENT_MOCK_DELAY_MS: '400',
-          IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT: JSON.stringify({
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'mock',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT_MOCK_DELAY_MS: '400',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT_MOCK_RESULT: JSON.stringify({
             status: 'done',
             appliedEntryIds: ['abcdef12'],
             files: ['src/page.html'],
@@ -408,7 +408,7 @@ colors: {}
   });
 
   it('/manual-edit-commit async mode returns immediately and reports completion through status/SSE activity', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-server-async-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-server-async-'));
     let asyncServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -418,9 +418,9 @@ colors: {}
       asyncServer = await startServer(8546, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'mock',
-          IMPECCABLE_LIVE_COPY_AGENT_MOCK_DELAY_MS: '300',
-          IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT: JSON.stringify({
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'mock',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT_MOCK_DELAY_MS: '300',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT_MOCK_RESULT: JSON.stringify({
             status: 'done',
             appliedEntryIds: ['ab12cd34'],
             files: ['src/page.html'],
@@ -468,7 +468,7 @@ colors: {}
   });
 
   it('/manual-edit-commit routes through the chat agent poll loop when configured', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-'));
     let chatServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -477,7 +477,7 @@ colors: {}
 
       chatServer = await startServer(8524, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       // Stash a single op.
@@ -588,12 +588,12 @@ colors: {}
   });
 
   it('/manual-edit-commit includes compact source candidates in chat Apply events', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-candidates-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-candidates-'));
     let candidateServer;
     try {
       mkdirSync(join(tmp, 'site/scripts/components'), { recursive: true });
       writeFileSync(join(tmp, 'site/scripts/data.js'), [
-        "export const skillFocusAreas = { impeccable: [",
+        "export const skillFocusAreas = { design-doctor: [",
         "  { area: 'Typography', detail: 'Scale, rhythm, hierarchy, expression' },",
         ']};',
         "export const dimensionGuidelineCounts = { 'Typography': 33 };",
@@ -611,7 +611,7 @@ colors: {}
 
       candidateServer = await startServer(8539, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       await stashManualEdit(candidateServer, {
@@ -685,7 +685,7 @@ colors: {}
   });
 
   it('/manual-edit-commit rejects malformed chat Apply results without rolling back before retry', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-invalid-result-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-invalid-result-'));
     let chatServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -694,7 +694,7 @@ colors: {}
 
       chatServer = await startServer(8537, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       await stashManualEdit(chatServer, {
@@ -801,7 +801,7 @@ colors: {}
   });
 
   it('/manual-edit-commit chunks chat Apply events by op count and aggregates replies', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-chunks-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-chunks-'));
     let chunkServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -811,8 +811,8 @@ colors: {}
       chunkServer = await startServer(8528, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -905,7 +905,7 @@ colors: {}
   });
 
   it('/manual-edit-commit keeps fitting multi-op entries together across chat chunks', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-entry-chunks-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-entry-chunks-'));
     let chunkServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -921,8 +921,8 @@ colors: {}
       chunkServer = await startServer(8544, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -1020,7 +1020,7 @@ colors: {}
   });
 
   it('/manual-edit-commit splits one multi-op entry and clears it only after every chunk applies', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-split-entry-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-split-entry-'));
     let splitServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1030,8 +1030,8 @@ colors: {}
       splitServer = await startServer(8529, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -1115,7 +1115,7 @@ colors: {}
   });
 
   it('/manual-edit-commit rolls back a split entry when a later chat chunk fails', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-chat-chunk-fail-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-chat-chunk-fail-'));
     let failServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1126,8 +1126,8 @@ colors: {}
       failServer = await startServer(8530, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -1226,7 +1226,7 @@ colors: {}
   });
 
   it('/manual-edit-commit keeps entries staged when the chat agent does not ack', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-commit-timeout-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-commit-timeout-'));
     let timeoutServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1236,9 +1236,9 @@ colors: {}
       timeoutServer = await startServer(8525, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_APPLY_EVENT_HARD_TIMEOUT_MS: '300',
-          IMPECCABLE_LIVE_APPLY_EVENT_SOFT_DEADLINE_MS: '250',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_APPLY_EVENT_HARD_TIMEOUT_MS: '300',
+          DESIGN_DOCTOR_LIVE_APPLY_EVENT_SOFT_DEADLINE_MS: '250',
         },
       });
 
@@ -1311,7 +1311,7 @@ colors: {}
   });
 
   it('/manual-edit-commit repairs post-apply validation failures instead of rolling back', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-repair-success-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-repair-success-'));
     let repairServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1323,7 +1323,7 @@ colors: {}
 
       repairServer = await startServer(8551, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       await stashManualEdit(repairServer, {
@@ -1428,7 +1428,7 @@ colors: {}
   });
 
   it('/manual-edit-commit asks for a decision after repeated repair failures', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-repair-decision-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-repair-decision-'));
     let decisionServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1439,7 +1439,7 @@ colors: {}
 
       decisionServer = await startServer(8552, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       await stashManualEdit(decisionServer, {
@@ -1535,7 +1535,7 @@ colors: {}
   });
 
   it('/manual-edit-discard cancels leased chat Apply events instead of redelivering them', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-discard-apply-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-discard-apply-'));
     let discardApplyServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1544,7 +1544,7 @@ colors: {}
 
       discardApplyServer = await startServer(8526, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       const stash = await fetch(`http://localhost:${discardApplyServer.port}/manual-edit-stash`, {
@@ -1639,7 +1639,7 @@ colors: {}
   });
 
   it('/manual-edit-commit rolls back abandoned chunk transactions after server restart', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-abandoned-transaction-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-abandoned-transaction-'));
     let abandonedServer;
     let restarted;
     try {
@@ -1651,8 +1651,8 @@ colors: {}
       abandonedServer = await startServer(8547, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -1721,8 +1721,8 @@ colors: {}
       restarted = await startServer(8547, {
         cwd: tmp,
         env: {
-          IMPECCABLE_LIVE_COPY_AGENT: 'chat',
-          IMPECCABLE_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
+          DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat',
+          DESIGN_DOCTOR_LIVE_MANUAL_EDIT_CHUNK_SIZE: '3',
         },
       });
 
@@ -1750,7 +1750,7 @@ colors: {}
   });
 
   it('/manual-edit-discard only cancels in-flight Apply events for the discarded page', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-discard-page-scope-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-discard-page-scope-'));
     let pageScopeServer;
     try {
       mkdirSync(join(tmp, 'src'), { recursive: true });
@@ -1761,7 +1761,7 @@ colors: {}
 
       pageScopeServer = await startServer(8527, {
         cwd: tmp,
-        env: { IMPECCABLE_LIVE_COPY_AGENT: 'chat' },
+        env: { DESIGN_DOCTOR_LIVE_COPY_AGENT: 'chat' },
       });
 
       const stashHome = await fetch(`http://localhost:${pageScopeServer.port}/manual-edit-stash`, {
@@ -1890,7 +1890,7 @@ colors: {}
   });
 
   it('/manual-edit-discard returns discarded entries so the browser can restore visible text', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-discard-server-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-discard-server-'));
     let discardServer;
     try {
       discardServer = await startServer(8523, { cwd: tmp });
@@ -1983,7 +1983,7 @@ colors: {}
   });
 
   it('/manual-edit-stash rejects a corrupt pending buffer instead of overwriting it', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-manual-stash-corrupt-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-manual-stash-corrupt-'));
     let stashServer;
     try {
       stashServer = await startServer(8526, { cwd: tmp });
@@ -2217,7 +2217,7 @@ colors: {}
   });
 
   it('redelivers an unacknowledged browser event after helper server restart', async () => {
-    const tmp = mkdtempSync(join(tmpdir(), 'impeccable-server-restart-'));
+    const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-server-restart-'));
     let firstServer;
     let restarted;
     try {
@@ -2272,7 +2272,7 @@ colors: {}
         token: server.token,
         type: 'generate',
         id: 'a1b2c3d9',
-        action: 'impeccable',
+        action: 'design-doctor',
         count: 1,
         pageUrl: '/',
         element: { outerHTML: '<button>Done</button>' },
@@ -2299,7 +2299,7 @@ colors: {}
         token: server.token,
         type: 'generate',
         id: 'a1b2c3dc',
-        action: 'impeccable',
+        action: 'design-doctor',
         count: 1,
         pageUrl: '/',
         element: { outerHTML: '<button>Manual</button>' },
@@ -2426,7 +2426,7 @@ colors: {}
         token: server.token,
         type: 'generate',
         id: '5ee7e575',
-        action: 'impeccable',
+        action: 'design-doctor',
         count: 3,
         pageUrl: '/',
         element: { tagName: 'h1', className: 'hero-title', outerHTML: '<h1 class="hero-title">Hello</h1>', textContent: 'Hello' },
@@ -2453,7 +2453,7 @@ colors: {}
     const res = await fetch(`http://localhost:${server.port}/source?token=${server.token}&path=package.json`);
     assert.equal(res.status, 200);
     const text = await res.text();
-    assert.ok(text.includes('"impeccable"'));
+    assert.ok(text.includes('"design-doctor"'));
   });
 
   it('/source rejects path traversal', async () => {

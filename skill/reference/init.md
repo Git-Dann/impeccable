@@ -4,17 +4,17 @@ The setup command for a project. One codebase crawl feeds everything it writes:
 
 - **PRODUCT.md** (strategic): root project file for register, target users, product purpose, brand personality, anti-references, strategic design principles. Answers "who/what/why".
 - **DESIGN.md** (visual): root project file for visual theme, color palette, typography, components, layout. Follows the [DESIGN.md format spec](https://raw.githubusercontent.com/google-labs-code/design.md/main/docs/spec.md). Answers "how it looks".
-- **`.impeccable/live/config.json`** (live mode): pre-configured so `{{command_prefix}}impeccable live` boots straight into variant mode with no first-time detour.
+- **`.design-doctor/live/config.json`** (live mode): pre-configured so `{{command_prefix}}design-doctor live` boots straight into variant mode with no first-time detour.
 
-It closes by pointing the user at the best command to run next. Every other impeccable command reads PRODUCT.md and DESIGN.md before doing any work.
+It closes by pointing the user at the best command to run next. Every other design-doctor command reads PRODUCT.md and DESIGN.md before doing any work.
 
 ## Step 1: Load current state
 
-Check what already exists. PRODUCT.md and DESIGN.md live at the project root, or under `.agents/context/` or `docs/` (case-insensitive). Read whichever are present with your native file tool. Also note whether `.impeccable/live/config.json` already exists (Step 6 leaves it untouched if so).
+Check what already exists. PRODUCT.md and DESIGN.md live at the project root, or under `.agents/context/` or `docs/` (case-insensitive). Read whichever are present with your native file tool. Also note whether `.design-doctor/live/config.json` already exists (Step 6 leaves it untouched if so).
 
 Decision tree:
 - **Neither file exists (empty project or no context yet)**: do Steps 2-4 (write PRODUCT.md), then decide on DESIGN.md based on whether there's code to analyze.
-- **PRODUCT.md exists, DESIGN.md missing**: skip to Step 5 and offer to run `/impeccable document` for DESIGN.md.
+- **PRODUCT.md exists, DESIGN.md missing**: skip to Step 5 and offer to run `/design-doctor document` for DESIGN.md.
 - **PRODUCT.md exists but has no `## Register` section (legacy)**: add it. Infer a hypothesis from the codebase (see Step 2), confirm with the user, write the field.
 - **PRODUCT.md exists but has no `## Platform` section (legacy)**: add it the same way, but only when the project is native (`ios` / `android` / `adaptive`) or the user wants it explicit; a missing field already means `web`.
 - **Both exist**: {{ask_instruction}} Ask which file to refresh. Skip the one the user doesn't want changed.
@@ -22,7 +22,7 @@ Decision tree:
 
 Never silently overwrite an existing file. Always confirm first.
 
-If init was invoked as a setup blocker by another command, such as `{{command_prefix}}impeccable craft landing page`, pause that command here. Complete init, then resume the original command. Your own writes are the freshest source; no reload needed. For craft, resume into shape next; init creates project context, but it is not a substitute for the task-specific shape interview and confirmed design brief.
+If init was invoked as a setup blocker by another command, such as `{{command_prefix}}design-doctor craft landing page`, pause that command here. Complete init, then resume the original command. Your own writes are the freshest source; no reload needed. For craft, resume into shape next; init creates project context, but it is not a substitute for the task-specific shape interview and confirmed design brief.
 
 ## Step 2: Explore the codebase
 
@@ -111,7 +111,7 @@ A monorepo shipping both a website and a native app gets a PRODUCT.md per app, e
 - What's the secondary fallback, for visitors not ready for the primary?
 - The one line a visitor should remember after 10 seconds.
 - What must the visitor believe, in order, before taking the primary CTA? (The template's belief ladder.)
-- What proof is on hand? Ask the user to hand over any testimonials, case studies, press, or client/partner logos they already have. If you can receive files directly, collect them; otherwise create `.impeccable/assets/proof/` and ask the user to add files there. Reference supplied files by path; record text proof inline.
+- What proof is on hand? Ask the user to hand over any testimonials, case studies, press, or client/partner logos they already have. If you can receive files directly, collect them; otherwise create `.design-doctor/assets/proof/` and ask the user to add files there. Reference supplied files by path; record text proof inline.
 
 ### Accessibility & Inclusion
 - Specific accessibility requirements? (WCAG level, known user needs)
@@ -169,32 +169,32 @@ Register is either `brand` or `product` as a bare value. No prose, no commentary
 
 Write fields as prose, and use bold sparingly: only where a word carries a decision, never as a label lead-in on every line.
 
-Write to `PROJECT_ROOT/PRODUCT.md`. If `.impeccable.md` existed, the loader already renamed it; merge into that content rather than starting from scratch.
+Write to `PROJECT_ROOT/PRODUCT.md`. If `.design-doctor.md` existed, the loader already renamed it; merge into that content rather than starting from scratch.
 
 ## Step 5: Decide on DESIGN.md
 
-Offer `/impeccable document` either way. Two paths:
+Offer `/design-doctor document` either way. Two paths:
 
 - **Code exists** (CSS tokens, components, a running site): "I can generate a DESIGN.md that captures your visual system (colors, typography, components) so variants stay on-brand. Want to do that now?"
 - **Pre-implementation** (empty project): "I can seed a starter DESIGN.md from five quick questions about color strategy, type direction, motion energy, and references. You can re-run once there's code, to capture the real tokens. Want to do that now?"
 
-If the user agrees, delegate to `/impeccable document` (it auto-detects scan vs seed). Load its reference and follow that flow.
+If the user agrees, delegate to `/design-doctor document` (it auto-detects scan vs seed). Load its reference and follow that flow.
 
-If the user prefers to skip, mention they can run `/impeccable document` any time later.
+If the user prefers to skip, mention they can run `/design-doctor document` any time later.
 
 ## Step 6: Configure live mode (when code exists)
 
 **Skip this step when the platform is native** (`ios` / `android` / `adaptive`): live mode drives a browser overlay. A hybrid wrapper or Expo web target serving HTML doesn't change that.
 
-If the project has code with HTML entries and a dev server (the same "code exists" condition that puts `/impeccable document` in scan mode), pre-configure live mode now. You already identified the framework and the served HTML entry in Step 2, so this is nearly free, and it spares the user the first-time setup detour when they later run `/impeccable live`.
+If the project has code with HTML entries and a dev server (the same "code exists" condition that puts `/design-doctor document` in scan mode), pre-configure live mode now. You already identified the framework and the served HTML entry in Step 2, so this is nearly free, and it spares the user the first-time setup detour when they later run `/design-doctor live`.
 
 **Skip this step for empty / pre-implementation projects** (nothing to inject into yet). Tell the user live mode will configure itself the first time they run it once there's code.
 
-**If `.impeccable/live/config.json` already exists, leave it untouched** and note that live mode is already configured.
+**If `.design-doctor/live/config.json` already exists, leave it untouched** and note that live mode is already configured.
 
 Otherwise:
 
-1. Write `.impeccable/live/config.json`. Choose `files` (the HTML entries the browser actually loads), `insertBefore`, and `commentSyntax` from the framework table in [live.md](live.md)'s **First-time setup** section, using the framework you found in Step 2. That table is canonical; do not restate it here. For multi-page static sites, prefer a glob (`["public/**/*.html"]`) over a literal list.
+1. Write `.design-doctor/live/config.json`. Choose `files` (the HTML entries the browser actually loads), `insertBefore`, and `commentSyntax` from the framework table in [live.md](live.md)'s **First-time setup** section, using the framework you found in Step 2. That table is canonical; do not restate it here. For multi-page static sites, prefer a glob (`["public/**/*.html"]`) over a literal list.
 2. Run `node {{scripts_path}}/detect-csp.mjs`. If it reports a patchable shape (`append-arrays` / `append-string`), use the **consent prompt template** from live.md before editing any source file. On decline, skip the patch. For `middleware` / `meta-tag` shapes, surface the detected files and ask the user to add `http://localhost:8400` to `script-src` and `connect-src` manually. For `null`, there's nothing to do.
 3. Set `cspChecked: true` in the config once CSP is handled (patched, declined, manual, or not needed). The schema and per-shape patch details live in live.md's First-time setup; follow it rather than duplicating.
 
@@ -210,12 +210,12 @@ Summarize tersely:
 
 Then recommend the **best commands to run next**, drawn from what your Step 2 crawl already surfaced. Do not run a fresh analysis here; surface observations you already have. Tailor to register **and platform**, offer the 2-4 most relevant (not a menu dump), and give the exact command to type. Group by intent:
 
-- **Build something new**: `/impeccable craft <feature>` (shape, then build end-to-end) or `/impeccable shape <feature>` (plan first). Lead with this for empty or early-stage projects.
-- **Improve what's there**: name the specific surface. `/impeccable critique <page>` for a scored UX review; `/impeccable audit <area>` for a11y / perf / responsive checks; `/impeccable polish <component>` for a pre-ship pass. When the crawl flagged a specific weakness, point the matching command at it: thin hierarchy or spacing → `layout`, flat or gray palette → `colorize`, missing error / empty states → `harden` or `onboard`, dull or unclear copy → `clarify`.
-- **Iterate visually** (web only): `/impeccable live` (configured in Step 6) to pick elements in the browser and generate variants in place. **Skip this group for native platforms.**
+- **Build something new**: `/design-doctor craft <feature>` (shape, then build end-to-end) or `/design-doctor shape <feature>` (plan first). Lead with this for empty or early-stage projects.
+- **Improve what's there**: name the specific surface. `/design-doctor critique <page>` for a scored UX review; `/design-doctor audit <area>` for a11y / perf / responsive checks; `/design-doctor polish <component>` for a pre-ship pass. When the crawl flagged a specific weakness, point the matching command at it: thin hierarchy or spacing → `layout`, flat or gray palette → `colorize`, missing error / empty states → `harden` or `onboard`, dull or unclear copy → `clarify`.
+- **Iterate visually** (web only): `/design-doctor live` (configured in Step 6) to pick elements in the browser and generate variants in place. **Skip this group for native platforms.**
 
-The full command menu is one bare `/impeccable` away; keep this list short and pointed.
+The full command menu is one bare `/design-doctor` away; keep this list short and pointed.
 
-If init was invoked as a blocker by another impeccable command (e.g. the user ran `/impeccable polish` with no PRODUCT.md), resume that original task now. Your own writes are the freshest source; no reload needed.
+If init was invoked as a blocker by another design-doctor command (e.g. the user ran `/design-doctor polish` with no PRODUCT.md), resume that original task now. Your own writes are the freshest source; no reload needed.
 
 Optionally {{ask_instruction}} Ask whether they'd like a brief summary of PRODUCT.md appended to {{config_file}} for easier agent reference. If yes, append a short **Design Context** pointer section there.

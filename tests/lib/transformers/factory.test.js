@@ -158,18 +158,18 @@ describe('createTransformer factory', () => {
     };
     const transform = createTransformer(config);
     const skills = [{
-      name: 'impeccable',
+      name: 'design-doctor',
       description: 'Test',
       body: 'Body',
       scripts: [{
         name: 'example.mjs',
         content: [
-          "export const IMPECCABLE_COMMAND_PREFIX = '/'; // @impeccable-provider-command-prefix",
-          'const command = `${IMPECCABLE_COMMAND_PREFIX}impeccable polish`;',
-          'const hint = "Run /impeccable audit";',
-          'const hook = ".github/hooks/impeccable.json";',
-          'const runtime = "/src/lib/impeccable/__runtime.js";',
-          'const regex = /impeccable\\b/gi;',
+          "export const DESIGN_DOCTOR_COMMAND_PREFIX = '/'; // @design-doctor-provider-command-prefix",
+          'const command = `${DESIGN_DOCTOR_COMMAND_PREFIX}design-doctor polish`;',
+          'const hint = "Run /design-doctor audit";',
+          'const hook = ".github/hooks/design-doctor.json";',
+          'const runtime = "/src/lib/design-doctor/__runtime.js";',
+          'const regex = /design-doctor\\b/gi;',
         ].join('\n'),
       }],
     }];
@@ -177,15 +177,15 @@ describe('createTransformer factory', () => {
     transform(skills, TEST_DIR);
 
     const script = fs.readFileSync(
-      path.join(TEST_DIR, 'codex/.test/skills/impeccable/scripts/example.mjs'),
+      path.join(TEST_DIR, 'codex/.test/skills/design-doctor/scripts/example.mjs'),
       'utf-8',
     );
-    expect(script).toContain('IMPECCABLE_COMMAND_PREFIX = "$"');
-    expect(script).toContain('`${IMPECCABLE_COMMAND_PREFIX}impeccable polish`');
-    expect(script).toContain('"Run /impeccable audit"');
-    expect(script).toContain('".github/hooks/impeccable.json"');
-    expect(script).toContain('"/src/lib/impeccable/__runtime.js"');
-    expect(script).toContain('/impeccable\\b/gi');
+    expect(script).toContain('DESIGN_DOCTOR_COMMAND_PREFIX = "$"');
+    expect(script).toContain('`${DESIGN_DOCTOR_COMMAND_PREFIX}design-doctor polish`');
+    expect(script).toContain('"Run /design-doctor audit"');
+    expect(script).toContain('".github/hooks/design-doctor.json"');
+    expect(script).toContain('"/src/lib/design-doctor/__runtime.js"');
+    expect(script).toContain('/design-doctor\\b/gi');
   });
 
   test('should clean existing directory before writing', () => {

@@ -6,20 +6,20 @@ import path from 'path';
 // excludes them from dist, and the harness-sync step preserves them across
 // the rm+recopy so local state isn't destroyed on every rebuild.
 // - config.json: legacy live-mode inject target list for existing projects.
-//   New installs write project config at .impeccable/live/config.json instead.
+//   New installs write project config at .design-doctor/live/config.json instead.
 export const PER_PROJECT_SCRIPT_ARTIFACTS = new Set(['config.json']);
 
 const DETECTOR_BUNDLE_DIR = 'cli/engine';
 
 // Detector source files that live OUTSIDE `cli/engine` but are imported by the
-// bundled engine. `cli/engine/cli/main.mjs` imports `../../lib/impeccable-config.mjs`,
-// which in the source CLI resolves to `cli/lib/impeccable-config.mjs`. The detector
+// bundled engine. `cli/engine/cli/main.mjs` imports `../../lib/design-doctor-config.mjs`,
+// which in the source CLI resolves to `cli/lib/design-doctor-config.mjs`. The detector
 // bundle copies `cli/engine/**` to `scripts/detector/**`, so from the bundled
 // `scripts/detector/cli/main.mjs` that same `../../lib/...` import resolves to
-// `scripts/lib/impeccable-config.mjs`. Copy the dependency there or the bundled
-// detector fails at import time with "Cannot find module .../lib/impeccable-config.mjs".
+// `scripts/lib/design-doctor-config.mjs`. Copy the dependency there or the bundled
+// detector fails at import time with "Cannot find module .../lib/design-doctor-config.mjs".
 const DETECTOR_EXTERNAL_DEPS = [
-  { src: 'cli/lib/impeccable-config.mjs', dest: 'lib/impeccable-config.mjs' },
+  { src: 'cli/lib/design-doctor-config.mjs', dest: 'lib/design-doctor-config.mjs' },
 ];
 
 // Walk the harness-dir skill tree and return any per-project script
@@ -235,7 +235,7 @@ export function readFilesRecursive(dir, fileList = []) {
 }
 
 /**
- * Read and parse the impeccable skill source.
+ * Read and parse the design-doctor skill source.
  * After v3.0 the repo holds exactly one user-invocable skill, flat at skill/.
  * Returns { skills: [oneEntry] } so downstream array-shaped consumers stay happy.
  *
@@ -244,7 +244,7 @@ export function readFilesRecursive(dir, fileList = []) {
  * and copies that directory verbatim. If `skill/SKILL.md` existed, `npx skills`
  * would install the UNCOMPILED source (unresolved `{{placeholders}}`, no vendored
  * detector). Naming it `SKILL.src.md` hides it from discovery so the CLI falls
- * through to a compiled harness dir (`.agents/skills/impeccable`) instead.
+ * through to a compiled harness dir (`.agents/skills/design-doctor`) instead.
  */
 export function readSourceFiles(rootDir) {
   const skillDir = path.join(rootDir, 'skill');
@@ -316,7 +316,7 @@ export function readSourceFiles(rootDir) {
   }
 
   skills.push({
-    name: frontmatter.name || 'impeccable',
+    name: frontmatter.name || 'design-doctor',
     description: frontmatter.description || '',
     license: frontmatter.license || '',
     compatibility: frontmatter.compatibility || '',
@@ -368,7 +368,7 @@ export function writeFile(filePath, content) {
  *   - Markdown bullet form:  `**DO**: …`  /  `**DON'T**: …`
  *   - Prose form:            `DO …`       /  `DO NOT …`
  *
- * Defaults to the main impeccable SKILL.md but accepts any relative path so
+ * Defaults to the main design-doctor SKILL.md but accepts any relative path so
  * rules in `cli/engine/detect-antipatterns.mjs` can anchor to register-specific
  * reference files (e.g. `reference/editorial.md`) via an optional `skillFile`
  * field. Callers that don't pass `relativePath` get the legacy behavior.
@@ -698,14 +698,14 @@ function escapeRegex(str) {
 }
 
 const EXCLUDED_FROM_SUGGESTIONS = new Set([
-  'impeccable',               // foundational skill, not a steering command
-  'teach-impeccable',         // deprecated shim
+  'design-doctor',               // foundational skill, not a steering command
+  'teach-design-doctor',         // deprecated shim
   'frontend-design',          // deprecated shim
 ]);
 
-// Sub-commands of /impeccable that should appear in {{available_commands}}.
+// Sub-commands of /design-doctor that should appear in {{available_commands}}.
 // These are the commands that audit/critique/etc. reference when suggesting next steps.
-const IMPECCABLE_SUB_COMMANDS = [
+const DESIGN_DOCTOR_SUB_COMMANDS = [
   'adapt', 'animate', 'audit', 'bolder', 'clarify', 'colorize',
   'critique', 'delight', 'distill', 'document', 'harden', 'layout',
   'onboard', 'optimize', 'overdrive', 'polish', 'quieter', 'shape', 'typeset',
@@ -716,15 +716,15 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
   const cmdPrefix = placeholders.command_prefix || '/';
 
   // Build the available_commands list.
-  // After the v3.0 consolidation, commands are sub-commands of /impeccable.
-  // If there's only one user-invocable skill (impeccable), generate sub-command references.
+  // After the v3.0 consolidation, commands are sub-commands of /design-doctor.
+  // If there's only one user-invocable skill (design-doctor), generate sub-command references.
   // Otherwise fall back to listing skill names (backwards compat for forks).
   const nonExcluded = commandNames.filter(n => !EXCLUDED_FROM_SUGGESTIONS.has(n));
   let commandList;
   if (nonExcluded.length === 0) {
-    // Single-skill architecture: list sub-commands as /impeccable <sub>
-    commandList = IMPECCABLE_SUB_COMMANDS
-      .map(n => `${cmdPrefix}impeccable ${n}`)
+    // Single-skill architecture: list sub-commands as /design-doctor <sub>
+    commandList = DESIGN_DOCTOR_SUB_COMMANDS
+      .map(n => `${cmdPrefix}design-doctor ${n}`)
       .join(', ');
   } else {
     // Multi-skill architecture (backwards compat)
@@ -740,8 +740,8 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
 
   // Replace `/skillname` invocations with the correct command prefix for this provider
   // (e.g., `/normalize` → `$normalize` for Codex). Require the slash to be
-  // outside a path or URL so `.github/hooks/impeccable.json` and
-  // `.codex/skills/impeccable` remain untouched.
+  // outside a path or URL so `.github/hooks/design-doctor.json` and
+  // `.codex/skills/design-doctor` remain untouched.
   if (cmdPrefix !== '/' && allSkillNames.length > 0) {
     const sorted = [...allSkillNames].sort((a, b) => b.length - a.length);
     for (const name of sorted) {
@@ -766,8 +766,8 @@ export function replacePlaceholders(content, provider, commandNames = [], allSki
 export function replaceScriptProviderMarker(content, provider) {
   const placeholders = PROVIDER_PLACEHOLDERS[provider] || PROVIDER_PLACEHOLDERS.cursor;
   const commandPrefix = placeholders.command_prefix || '/';
-  const marker = "export const IMPECCABLE_COMMAND_PREFIX = '/'; // @impeccable-provider-command-prefix";
-  const rendered = `export const IMPECCABLE_COMMAND_PREFIX = ${JSON.stringify(commandPrefix)};`;
+  const marker = "export const DESIGN_DOCTOR_COMMAND_PREFIX = '/'; // @design-doctor-provider-command-prefix";
+  const rendered = `export const DESIGN_DOCTOR_COMMAND_PREFIX = ${JSON.stringify(commandPrefix)};`;
   return content.replace(marker, rendered);
 }
 

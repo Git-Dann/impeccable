@@ -2,7 +2,7 @@ Shape the UX and UI for a feature before any code is written. This command produ
 
 **Scope**: Design planning only. This command does NOT write code. It produces the thinking that makes code good.
 
-**Output**: A design brief that can be handed off to {{command_prefix}}impeccable craft, or directly to {{command_prefix}}impeccable for freeform implementation. When visual direction probes are used, the images are supporting artifacts, not the primary output.
+**Output**: A design brief that can be handed off to {{command_prefix}}design-doctor craft, or directly to {{command_prefix}}design-doctor for freeform implementation. When visual direction probes are used, the images are supporting artifacts, not the primary output.
 
 ## Philosophy
 
@@ -151,7 +151,7 @@ How users interact with this feature. What happens on click, hover, scroll? What
 What copy, labels, empty state messages, error messages, and microcopy are needed. Note any dynamic content and its realistic ranges. For image-led surfaces, also list the required image/media roles and their likely source (project asset, generated raster, semantic SVG/CSS, canvas/WebGL, icon library, or accepted omission).
 
 **9. Recommended References**
-Based on the brief, list which impeccable reference files would be most valuable during implementation (e.g., layout.md for complex layouts, animate.md for animated features, interaction-design.md for form-heavy features, typeset.md for typography-driven pages, colorize.md for color-led brands).
+Based on the brief, list which design-doctor reference files would be most valuable during implementation (e.g., layout.md for complex layouts, animate.md for animated features, interaction-design.md for form-heavy features, typeset.md for typography-driven pages, colorize.md for color-led brands).
 
 **10. Open Questions**
 Anything genuinely unresolved. Don't list "open questions" you've already recommended a default for; assert the default and move on. If you'd write `Recommend: X` next to a question, just decide X.
@@ -162,4 +162,4 @@ Anything genuinely unresolved. Don't list "open questions" you've already recomm
 
 If the user disagrees with any part, revisit the relevant discovery questions. A shape run is incomplete until the user confirms direction.
 
-Once confirmed, the brief is complete. The user can now hand it to {{command_prefix}}impeccable, or use it to guide any other implementation approach. (If the user wants the full discovery-then-build flow in one step, they should use {{command_prefix}}impeccable craft instead, which runs this command internally.)
+Once confirmed, the brief is complete. The user can now hand it to {{command_prefix}}design-doctor, or use it to guide any other implementation approach. (If the user wants the full discovery-then-build flow in one step, they should use {{command_prefix}}design-doctor craft instead, which runs this command internally.)

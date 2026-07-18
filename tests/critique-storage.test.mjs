@@ -47,8 +47,8 @@ describe('slugFromTarget', () => {
 
   it('normalizes URL casing and trailing slash', () => {
     assert.equal(
-      slugFromTarget('https://Impeccable.Style/docs/audit/', { cwd }),
-      'impeccable-style-docs-audit',
+      slugFromTarget('https://Example.COM/docs/audit/', { cwd }),
+      'example-com-docs-audit',
     );
   });
 
@@ -120,7 +120,7 @@ describe('writeSnapshot + readLatestSnapshot', () => {
   });
 
   it('caller-supplied meta cannot override computed timestamp or slug', () => {
-    // Defends against a corrupt IMPECCABLE_CRITIQUE_META blob (parsed from
+    // Defends against a corrupt DESIGN_DOCTOR_CRITIQUE_META blob (parsed from
     // an env var) silently rewriting fields that must agree with the
     // filename. Otherwise readTrend would attribute scores to the wrong
     // timestamps with no error.

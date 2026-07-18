@@ -4,7 +4,7 @@
   let expenses = $state([]);
 
   onMount(() => {
-    window.__impeccableStatefulMounts = (window.__impeccableStatefulMounts || 0) + 1;
+    window.__designDoctorStatefulMounts = (window.__designDoctorStatefulMounts || 0) + 1;
   });
 
   function addExpense() {

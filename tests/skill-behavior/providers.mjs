@@ -11,7 +11,7 @@
  * @ai-sdk/google for the same reason — uniform tool-use semantics across all
  * three keeps the harness tiny.
  *
- * .env is loaded from the repo root (copied from impeccable-evals). Tests
+ * .env is loaded from the repo root (copied from design-doctor-evals). Tests
  * skip cleanly when the matching key is unset rather than failing CI.
  */
 import { anthropic } from '@ai-sdk/anthropic';
@@ -81,12 +81,12 @@ export function getModel(modelId) {
  * Default model lineup. Production-tier on Anthropic and OpenAI to match what
  * users actually run; gemini stays on the flash-lite tier. The test is about
  * routing/loading behavior, not design output quality.
- * Override with IMPECCABLE_SKILL_BEHAVIOR_MODELS=claude-foo,gpt-bar.
+ * Override with DESIGN_DOCTOR_SKILL_BEHAVIOR_MODELS=claude-foo,gpt-bar.
  */
 export const DEFAULT_MODELS = ['claude-sonnet-4-6', 'gpt-5.5', 'gemini-3.1-flash-lite'];
 
 export function resolveModelList() {
-  const override = process.env.IMPECCABLE_SKILL_BEHAVIOR_MODELS;
+  const override = process.env.DESIGN_DOCTOR_SKILL_BEHAVIOR_MODELS;
   if (override && override.trim()) {
     return override.split(',').map((s) => s.trim()).filter(Boolean);
   }

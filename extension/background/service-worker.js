@@ -1,5 +1,5 @@
 /**
- * Impeccable DevTools Extension - Service Worker
+ * Design Doctor DevTools Extension - Service Worker
  *
  * Routes messages between popup, DevTools panel, and content scripts.
  * Maintains per-tab state and updates the badge.
@@ -42,7 +42,7 @@ async function getSettings() {
     disabledRules: [],
     lineLengthMode: 'strict', // 'strict' = 80, 'lax' = 120
     spotlightBlur: true,      // dim/blur the page on hover-highlight
-    autoScan: 'panel',        // 'panel' = scan when Impeccable UI opens, 'devtools' = scan when DevTools opens
+    autoScan: 'panel',        // 'panel' = scan when Design Doctor UI opens, 'devtools' = scan when DevTools opens
   });
 }
 
@@ -86,7 +86,7 @@ async function sendScanToTab(tabId) {
     let url = '';
     try { url = (await chrome.tabs.get(tabId))?.url || ''; } catch { /* tab gone */ }
     const message = url.startsWith('file:')
-      ? 'Can\u2019t scan local files. Enable \u201CAllow access to file URLs\u201D for Impeccable in chrome://extensions.'
+      ? 'Can\u2019t scan local files. Enable \u201CAllow access to file URLs\u201D for Design Doctor in chrome://extensions.'
       : `Couldn\u2019t scan this page${error ? `: ${error}` : '.'}`;
     chrome.runtime.sendMessage({ action: 'scan-failed', tabId, message }).catch(() => {});
     return;
@@ -144,9 +144,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       world: 'MAIN',
       files: ['detector/detect.js'],
     }).then(() => {
-      // Detector will post impeccable-ready, content script handles the rest
+      // Detector will post design-doctor-ready, content script handles the rest
     }).catch((err) => {
-      console.warn('[impeccable] Fallback injection failed:', err);
+      console.warn('[design-doctor] Fallback injection failed:', err);
     });
     sendResponse({ ok: true });
   }
@@ -185,8 +185,8 @@ async function tearDownTab(tabId) {
 // Handle long-lived connections from DevTools pages and panels
 chrome.runtime.onConnect.addListener((port) => {
   // Lifecycle port from devtools.js -- tracks DevTools open/close
-  if (port.name.startsWith('impeccable-devtools-')) {
-    const tabId = parseInt(port.name.replace('impeccable-devtools-', ''), 10);
+  if (port.name.startsWith('design-doctor-devtools-')) {
+    const tabId = parseInt(port.name.replace('design-doctor-devtools-', ''), 10);
     devtoolsTabs.add(tabId);
 
     port.onMessage.addListener((msg) => {
@@ -202,8 +202,8 @@ chrome.runtime.onConnect.addListener((port) => {
   }
 
   // Panel port from panel.js -- for forwarding findings/state
-  if (port.name.startsWith('impeccable-panel-')) {
-    const tabId = parseInt(port.name.replace('impeccable-panel-', ''), 10);
+  if (port.name.startsWith('design-doctor-panel-')) {
+    const tabId = parseInt(port.name.replace('design-doctor-panel-', ''), 10);
     if (!panelPorts.has(tabId)) panelPorts.set(tabId, new Set());
     panelPorts.get(tabId).add(port);
 
@@ -235,10 +235,10 @@ chrome.runtime.onConnect.addListener((port) => {
   }
 
   // Sidebar pane port (Elements panel sidebar) -- receives findings updates.
-  // Connecting the sidebar is a strong signal of "user engaged with Impeccable"
+  // Connecting the sidebar is a strong signal of "user engaged with Design Doctor"
   // so we trigger a scan if no findings exist yet (matches the panel port behavior).
-  if (port.name.startsWith('impeccable-sidebar-')) {
-    const tabId = parseInt(port.name.replace('impeccable-sidebar-', ''), 10);
+  if (port.name.startsWith('design-doctor-sidebar-')) {
+    const tabId = parseInt(port.name.replace('design-doctor-sidebar-', ''), 10);
     if (!panelPorts.has(tabId)) panelPorts.set(tabId, new Set());
     panelPorts.get(tabId).add(port);
 

@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 
 const CLI = resolve('cli/bin/cli.js');
 
-describe('impeccable ignores CLI', () => {
+describe('design-doctor ignores CLI', () => {
   let root;
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('impeccable ignores CLI', () => {
   }
 
   function readConfig(name = 'config.json') {
-    return JSON.parse(readFileSync(join(root, '.impeccable', name), 'utf-8'));
+    return JSON.parse(readFileSync(join(root, '.design-doctor', name), 'utf-8'));
   }
 
   test('adds and lists shared file and value ignores under detector', () => {
@@ -112,12 +112,12 @@ describe('impeccable ignores CLI', () => {
     const result = run(['add-value', 'design-system-color', '*']);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('Wildcard value ignores must be scoped');
-    expect(existsSync(join(root, '.impeccable', 'config.json'))).toBe(false);
+    expect(existsSync(join(root, '.design-doctor', 'config.json'))).toBe(false);
   });
 
   test('removes an existing broad wildcard value ignore', () => {
-    mkdirSync(join(root, '.impeccable'), { recursive: true });
-    writeFileSync(join(root, '.impeccable', 'config.json'), JSON.stringify({
+    mkdirSync(join(root, '.design-doctor'), { recursive: true });
+    writeFileSync(join(root, '.design-doctor', 'config.json'), JSON.stringify({
       detector: {
         ignoreValues: [{ rule: 'design-system-color', value: '*' }],
       },

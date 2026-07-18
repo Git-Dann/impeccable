@@ -1,6 +1,6 @@
 # Developer Guide
 
-Documentation for contributors to Impeccable.
+Documentation for contributors to Design Doctor.
 
 ## Architecture
 
@@ -169,7 +169,7 @@ The skill-behavior suite runs three providers (claude-haiku-4-5, gpt-5.4-mini, g
 ## Repository Structure
 
 ```
-impeccable/
+design-doctor/
   source/                          # Edit these! Source of truth
     skills/                        # Skill definitions
       frontend-design/
@@ -216,4 +216,4 @@ impeccable/
 
 ## Questions?
 
-Open an issue first. If a maintainer approves the direction, offer to follow up with a PR. Regular contributors `pbakaus` and `abdulwahabone` may open PRs directly.
+Open an issue first. If a maintainer approves the direction, offer to follow up with a PR.

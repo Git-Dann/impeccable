@@ -28,7 +28,7 @@ function withoutDesignSystemArgs(args) {
 }
 
 function writeStaticFixture(files) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-static-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-static-'));
   for (const [name, contents] of Object.entries(files)) {
     const fullPath = path.join(dir, name);
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
@@ -1015,7 +1015,7 @@ describe('CLI', () => {
   });
 
   test('local DESIGN.md enables design-system rules by default and --no-design-system disables them', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-cli-design-system-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-cli-design-system-'));
     try {
       fs.writeFileSync(path.join(dir, 'DESIGN.md'), `---
 typography:
@@ -1074,7 +1074,7 @@ rounded:
   });
 
   test('--scope filters CLI output to a design domain', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-cli-scope-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-cli-scope-'));
     try {
       fs.writeFileSync(path.join(dir, 'DESIGN.md'), `---
 typography:
@@ -1129,10 +1129,10 @@ colors:
   });
 
   test('detector designSystem.enabled=false disables CLI design-system rules', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-cli-design-disabled-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-cli-design-disabled-'));
     try {
-      fs.mkdirSync(path.join(dir, '.impeccable'), { recursive: true });
-      fs.writeFileSync(path.join(dir, '.impeccable', 'config.json'), JSON.stringify({
+      fs.mkdirSync(path.join(dir, '.design-doctor'), { recursive: true });
+      fs.writeFileSync(path.join(dir, '.design-doctor', 'config.json'), JSON.stringify({
         detector: { designSystem: { enabled: false } },
       }));
       fs.writeFileSync(path.join(dir, 'DESIGN.md'), `---
@@ -1162,9 +1162,9 @@ rounded:
     }
   });
 
-  test('respects .impeccable config ignoreFiles like the hook', async () => {
+  test('respects .design-doctor config ignoreFiles like the hook', async () => {
     await withStaticFixture({
-      '.impeccable/config.json': JSON.stringify({
+      '.design-doctor/config.json': JSON.stringify({
         detector: { ignoreFiles: ['src/noisy.css'] },
       }),
       'src/noisy.css': "body { font-family: 'Inter', sans-serif; }",
@@ -1175,9 +1175,9 @@ rounded:
     });
   });
 
-  test('respects .impeccable config ignoreRules like the hook', async () => {
+  test('respects .design-doctor config ignoreRules like the hook', async () => {
     await withStaticFixture({
-      '.impeccable/config.json': JSON.stringify({
+      '.design-doctor/config.json': JSON.stringify({
         detector: { ignoreRules: ['side-tab'] },
       }),
       'src/card.css': '.card { border-left: 4px solid #3b82f6; border-radius: 12px; }',
@@ -1188,9 +1188,9 @@ rounded:
     });
   });
 
-  test('respects .impeccable config ignoreValues like the hook', async () => {
+  test('respects .design-doctor config ignoreValues like the hook', async () => {
     await withStaticFixture({
-      '.impeccable/config.json': JSON.stringify({
+      '.design-doctor/config.json': JSON.stringify({
         detector: {
           ignoreValues: [
             { rule: 'overused-font', value: 'Inter' },
@@ -1212,7 +1212,7 @@ rounded:
 
   test('respects scoped wildcard ignoreValues like the hook', async () => {
     await withStaticFixture({
-      '.impeccable/config.json': JSON.stringify({
+      '.design-doctor/config.json': JSON.stringify({
         detector: {
           ignoreValues: [
             { rule: 'overused-font', value: '*', files: ['src/main.css'] },

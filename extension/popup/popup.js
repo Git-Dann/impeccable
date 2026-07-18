@@ -1,5 +1,5 @@
 /**
- * Impeccable DevTools Extension - Popup
+ * Design Doctor DevTools Extension - Popup
  *
  * Quick controls: scan, toggle overlays, and see finding count.
  */

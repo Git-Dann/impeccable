@@ -7,7 +7,7 @@ Last verified: 2026-04-28 (subagent landscape spot-checked 2026-06-28)
 
 > This file is point-in-time. Capabilities move fast; verify live before relying
 > on any "only X supports Y" claim. Notably, the subagent table below lists
-> Impeccable's *emission targets*, not the support landscape (see its note).
+> Design Doctor's *emission targets*, not the support landscape (see its note).
 
 ## Official Documentation
 
@@ -54,18 +54,18 @@ Fields marked with * are spec-standard. Others are provider extensions.
 
 Notes:
 - Gemini CLI validates only `name` and `description`; other spec fields are parsed but ignored.
-- Codex CLI uses a separate `agents/openai.yaml` sidecar for skill metadata (icons, branding, MCP tools, invocation control). Codex also auto-discovers subagents bundled inside an installed skill's `agents/` folder (TOML), which is how Impeccable ships its asset-producer. Standalone custom agents can still live under `.codex/agents/` or `~/.codex/agents/`, but Impeccable no longer installs anything there.
+- Codex CLI uses a separate `agents/openai.yaml` sidecar for skill metadata (icons, branding, MCP tools, invocation control). Codex also auto-discovers subagents bundled inside an installed skill's `agents/` folder (TOML), which is how Design Doctor ships its asset-producer. Standalone custom agents can still live under `.codex/agents/` or `~/.codex/agents/`, but Design Doctor no longer installs anything there.
 - Codex CLI hooks ship under `[features].hooks = true` (still flagged), require `/hooks` trust ceremony per-update, and are disabled on Windows.
 - Kiro recognizes `user-invocable` and `disable-model-invocation` per community reports but does not formally document them.
 - Unknown fields are silently ignored by all harnesses.
 
-## Hook surface used by Impeccable
+## Hook surface used by Design Doctor
 
 | Harness | Edit hook | Startup hook | Manifest location | Notes |
 |---------|:---------:|:------------:|-------------------|-------|
-| Claude Code | Yes (`PostToolUse`) | No | `.claude/settings.json` | Project-local settings entry installed by `npx impeccable skills install/update`. Runs `.claude/skills/impeccable/scripts/hook.mjs`. |
-| Codex CLI | Yes (`PostToolUse`) | No | `.codex/hooks.json` | Project-local manifest installed with the `.agents/skills/impeccable` payload. Runs `.agents/skills/impeccable/scripts/hook.mjs` from the git root. Requires normal `/hooks` trust approval. |
-| Cursor | Yes (`preToolUse`) | No | `.cursor/hooks.json` | Project-level manifest installed with `.cursor/skills/impeccable`. Runs `hook-before-edit.mjs` to block bad proposed writes before they land. Reloads on save; restart Cursor if hooks do not pick up. |
+| Claude Code | Yes (`PostToolUse`) | No | `.claude/settings.json` | Project-local settings entry installed by `npx design-doctor skills install/update`. Runs `.claude/skills/design-doctor/scripts/hook.mjs`. |
+| Codex CLI | Yes (`PostToolUse`) | No | `.codex/hooks.json` | Project-local manifest installed with the `.agents/skills/design-doctor` payload. Runs `.agents/skills/design-doctor/scripts/hook.mjs` from the git root. Requires normal `/hooks` trust approval. |
+| Cursor | Yes (`preToolUse`) | No | `.cursor/hooks.json` | Project-level manifest installed with `.cursor/skills/design-doctor`. Runs `hook-before-edit.mjs` to block bad proposed writes before they land. Reloads on save; restart Cursor if hooks do not pick up. |
 | All other harnesses | No | No | n/a | No documented hook surface today. Skill and commands still ship. |
 
 ## Skill Directory Structure
@@ -87,12 +87,12 @@ Notes:
 
 All harnesses support the `{skill-name}/SKILL.md` directory structure with optional `reference/`, `scripts/`, and `assets/` subdirectories.
 
-## Native Subagent Directory Structure (Impeccable emission targets)
+## Native Subagent Directory Structure (Design Doctor emission targets)
 
-> **Scope:** this table is **where Impeccable emits native subagent files**, not a
+> **Scope:** this table is **where Design Doctor emits native subagent files**, not a
 > map of which harnesses support subagents. Subagents are broadly supported now:
 > Cursor (auto-delegation + `/name` invocation, https://cursor.com/docs/subagents),
-> GitHub Copilot, and Google Antigravity ship them too. Impeccable only writes
+> GitHub Copilot, and Google Antigravity ship them too. Design Doctor only writes
 > native files where there is a stable, documented on-disk format to target.
 
 | Harness | Native directory | File format |
@@ -100,7 +100,7 @@ All harnesses support the `{skill-name}/SKILL.md` directory structure with optio
 | Claude Code | `.claude/agents/` (installed plugin) | Markdown with YAML frontmatter |
 | Codex CLI | `<skill>/agents/` (nested, auto-discovered) | TOML |
 
-Impeccable keeps canonical agent prompts under `skill/agents/` and emits provider-native files only for harnesses with a documented on-disk subagent format. Claude reads its agents from the installed plugin; Codex auto-discovers the TOML bundled inside the installed skill's own `agents/` folder, so the normal skills install carries it with no separate sidecar.
+Design Doctor keeps canonical agent prompts under `skill/agents/` and emits provider-native files only for harnesses with a documented on-disk subagent format. Claude reads its agents from the installed plugin; Codex auto-discovers the TOML bundled inside the installed skill's own `agents/` folder, so the normal skills install carries it with no separate sidecar.
 
 **Spawn / permission model** (matters more than directory support when building skills):
 

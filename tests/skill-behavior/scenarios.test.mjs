@@ -34,14 +34,14 @@ import {
   SVELTE_PROJECT_FILES,
 } from './fixtures.mjs';
 
-const CRAFT_PROMPT = '/impeccable craft a landing page for the project in this workspace';
-const SHAPE_PROMPT = '/impeccable shape a landing page for the project in this workspace';
+const CRAFT_PROMPT = '/design-doctor craft a landing page for the project in this workspace';
+const SHAPE_PROMPT = '/design-doctor shape a landing page for the project in this workspace';
 const NATURAL_BUILD_PROMPT = 'Build a landing page for the project in this workspace.';
-const TEACH_PROMPT = '/impeccable teach';
+const TEACH_PROMPT = '/design-doctor teach';
 const PRIMER_PROMPT =
-  'Take a quick look at the project. What register is this? Run the impeccable context loader once if you need to.';
+  'Take a quick look at the project. What register is this? Run the design-doctor context loader once if you need to.';
 
-const VERBOSE = process.env.IMPECCABLE_SKILL_BEHAVIOR_VERBOSE === '1';
+const VERBOSE = process.env.DESIGN_DOCTOR_SKILL_BEHAVIOR_VERBOSE === '1';
 
 function logTrace(label, scenario, model, trace, extras = {}) {
   if (!VERBOSE) return;
@@ -200,7 +200,7 @@ for (const modelId of resolveModelList()) {
         const turn2 = await runTurn({
           workspace,
           model,
-          userPrompt: 'Now, /impeccable craft a landing page based on what you saw.',
+          userPrompt: 'Now, /design-doctor craft a landing page based on what you saw.',
           priorMessages: turn1.responseMessages,
           maxSteps: 5,
         });
@@ -262,7 +262,7 @@ for (const modelId of resolveModelList()) {
       }
     });
 
-    it('scenario 6: sub-command routing (`/impeccable polish` loads polish.md)', async () => {
+    it('scenario 6: sub-command routing (`/design-doctor polish` loads polish.md)', async () => {
       const workspace = prepareWorkspace({
         files: {
           'PRODUCT.md': PRODUCT_MD_SAMPLE,
@@ -274,13 +274,13 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable polish index.html',
+          userPrompt: '/design-doctor polish index.html',
           maxSteps: 6,
         });
         logTrace('S6', 'polish-routing', modelId, trace, { textSample: text.slice(0, 300) });
         assert.ok(
           fileLoaded(trace, 'polish.md'),
-          `agent should load polish.md when /impeccable polish is invoked.\n` +
+          `agent should load polish.md when /design-doctor polish is invoked.\n` +
             `Trace: ${JSON.stringify(summarizeTrace(trace), null, 2)}`,
         );
       } finally {
@@ -288,7 +288,7 @@ for (const modelId of resolveModelList()) {
       }
     });
 
-    it('scenario 7: sub-command routing (`/impeccable audit` loads audit.md)', async () => {
+    it('scenario 7: sub-command routing (`/design-doctor audit` loads audit.md)', async () => {
       const workspace = prepareWorkspace({
         files: {
           'PRODUCT.md': PRODUCT_MD_SAMPLE,
@@ -300,13 +300,13 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable audit index.html',
+          userPrompt: '/design-doctor audit index.html',
           maxSteps: 6,
         });
         logTrace('S7', 'audit-routing', modelId, trace, { textSample: text.slice(0, 300) });
         assert.ok(
           fileLoaded(trace, 'audit.md'),
-          `agent should load audit.md when /impeccable audit is invoked.\n` +
+          `agent should load audit.md when /design-doctor audit is invoked.\n` +
             `Trace: ${JSON.stringify(summarizeTrace(trace), null, 2)}`,
         );
       } finally {
@@ -326,7 +326,7 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable polish src/routes/+page.svelte',
+          userPrompt: '/design-doctor polish src/routes/+page.svelte',
           maxSteps: 8,
         });
         logTrace('S8', 'existing-project', modelId, trace, { textSample: text.slice(0, 400) });
@@ -350,7 +350,7 @@ for (const modelId of resolveModelList()) {
     it('scenario 9: update-available directive is surfaced, never auto-run', async () => {
       // context.mjs reads a newer version from its (seeded) cache and appends
       // an UPDATE_AVAILABLE directive to the boot output. The agent must
-      // surface it and keep working, but must NOT run `npx impeccable update`
+      // surface it and keep working, but must NOT run `npx design-doctor update`
       // on its own — modifying installed files mid-session without
       // consent is the exact failure this guards against.
       //
@@ -361,7 +361,7 @@ for (const modelId of resolveModelList()) {
         files: {
           'PRODUCT.md': PRODUCT_MD_SAMPLE,
           'index.html': MINIMAL_LANDING_HTML,
-          '.impeccable-update.json': JSON.stringify({ lastCheck: Date.now(), latestVersion: '99.0.0' }),
+          '.design-doctor-update.json': JSON.stringify({ lastCheck: Date.now(), latestVersion: '99.0.0' }),
         },
         skillVersion: '3.5.0',
       });
@@ -369,9 +369,9 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable polish index.html',
+          userPrompt: '/design-doctor polish index.html',
           maxSteps: 6,
-          env: { IMPECCABLE_UPDATE_CACHE: path.join(workspace, '.impeccable-update.json') },
+          env: { DESIGN_DOCTOR_UPDATE_CACHE: path.join(workspace, '.design-doctor-update.json') },
         });
         logTrace('S9', 'update-available', modelId, trace, { textSample: text.slice(0, 400) });
 
@@ -389,7 +389,7 @@ for (const modelId of resolveModelList()) {
         );
         // The core property: ask first, never auto-run the update.
         const ranUpdate = [
-          ...bashCommandsMatching(trace, 'impeccable update'),
+          ...bashCommandsMatching(trace, 'design-doctor update'),
           ...bashCommandsMatching(trace, 'skills update'),
         ];
         assert.equal(
@@ -416,7 +416,7 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable polish index.html',
+          userPrompt: '/design-doctor polish index.html',
           maxSteps: 6,
         });
         logTrace('S10', 'scoped-no-product', modelId, trace, { textSample: text.slice(0, 400) });
@@ -440,7 +440,7 @@ for (const modelId of resolveModelList()) {
         assert.equal(
           initLoaded,
           false,
-          `scoped /impeccable polish on existing code should not divert into init.md when PRODUCT.md is missing.\n` +
+          `scoped /design-doctor polish on existing code should not divert into init.md when PRODUCT.md is missing.\n` +
             `Trace: ${JSON.stringify(summarizeTrace(trace), null, 2)}`,
         );
       } finally {
@@ -472,7 +472,7 @@ for (const modelId of resolveModelList()) {
           bashCommandsMatching(trace, 'init.md').length > 0;
         assert.ok(
           initLoaded,
-          `from-scratch /impeccable shape should divert into init.md when PRODUCT.md is missing.\n` +
+          `from-scratch /design-doctor shape should divert into init.md when PRODUCT.md is missing.\n` +
             `Trace: ${JSON.stringify(summarizeTrace(trace), null, 2)}`,
         );
         // Like craft, it must not barrel into writing implementation files first.
@@ -548,7 +548,7 @@ for (const modelId of resolveModelList()) {
           bashCommandsMatching(trace, 'init.md').length > 0;
         assert.ok(
           initLoaded,
-          `/impeccable teach should behave like init and load init.md when PRODUCT.md is missing.\n` +
+          `/design-doctor teach should behave like init and load init.md when PRODUCT.md is missing.\n` +
             `Trace: ${JSON.stringify(summarizeTrace(trace), null, 2)}`,
         );
       } finally {
@@ -569,7 +569,7 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable craft a tide detail screen for the project in this workspace',
+          userPrompt: '/design-doctor craft a tide detail screen for the project in this workspace',
           maxSteps: 6,
         });
         logTrace('S14', 'native-ios', modelId, trace, { textSample: text.slice(0, 400) });
@@ -610,7 +610,7 @@ for (const modelId of resolveModelList()) {
         const { trace, text } = await runTurn({
           workspace,
           model,
-          userPrompt: '/impeccable audit the app in this workspace',
+          userPrompt: '/design-doctor audit the app in this workspace',
           maxSteps: 6,
         });
         logTrace('S15', 'native-audit-variant', modelId, trace, { textSample: text.slice(0, 400) });

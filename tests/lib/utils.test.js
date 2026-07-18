@@ -180,7 +180,7 @@ describe('generateYamlFrontmatter', () => {
 
   test('should quote strings containing colon-space (breaks plain scalars)', () => {
     const data = {
-      name: 'impeccable',
+      name: 'design-doctor',
       description: 'Design fluency. Also handles: critique, audit. Commands: craft, polish.'
     };
 
@@ -438,11 +438,11 @@ Audit the code.`;
 
   test('should read skill with reference files', () => {
     const skillContent = `---
-name: impeccable
-description: Impeccable design skill
+name: design-doctor
+description: Design Doctor design skill
 ---
 
-Impeccable design instructions.`;
+Design Doctor design instructions.`;
 
     const skillDir = path.join(testRootDir, 'skill');
     ensureDir(skillDir);
@@ -462,7 +462,7 @@ Impeccable design instructions.`;
     expect(refNames).toEqual(['color', 'typography']);
   });
 
-  test('should fall back to "impeccable" when frontmatter has no name', () => {
+  test('should fall back to "design-doctor" when frontmatter has no name', () => {
     const skillDir = path.join(testRootDir, 'skill');
     ensureDir(skillDir);
     fs.writeFileSync(path.join(skillDir, 'SKILL.src.md'), 'Just body, no frontmatter.');
@@ -470,7 +470,7 @@ Impeccable design instructions.`;
     const { skills } = readSourceFiles(testRootDir);
 
     expect(skills).toHaveLength(1);
-    expect(skills[0].name).toBe('impeccable');
+    expect(skills[0].name).toBe('design-doctor');
   });
 
   test('should ignore non-md files in skill/reference', () => {
@@ -622,23 +622,23 @@ describe('replacePlaceholders', () => {
     expect(result).toBe('Commands: /audit, /polish, /optimize');
   });
 
-  test('should exclude impeccable from {{available_commands}}', () => {
-    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'impeccable', 'polish']);
+  test('should exclude design-doctor from {{available_commands}}', () => {
+    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'design-doctor', 'polish']);
     expect(result).toBe('Commands: /audit, /polish');
   });
 
-  test('should exclude legacy teach-impeccable from {{available_commands}}', () => {
-    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'teach-impeccable', 'polish']);
+  test('should exclude legacy teach-design-doctor from {{available_commands}}', () => {
+    const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', ['audit', 'teach-design-doctor', 'polish']);
     expect(result).toBe('Commands: /audit, /polish');
   });
 
-  test('lists /impeccable sub-commands for {{available_commands}} when no command names are passed', () => {
+  test('lists /design-doctor sub-commands for {{available_commands}} when no command names are passed', () => {
     // v3.0 single-skill architecture: with no command names, the list falls back
-    // to the IMPECCABLE_SUB_COMMANDS sub-commands rendered as `/impeccable <sub>`.
+    // to the DESIGN_DOCTOR_SUB_COMMANDS sub-commands rendered as `/design-doctor <sub>`.
     const result = replacePlaceholders('Commands: {{available_commands}}', 'claude-code', []);
-    expect(result.startsWith('Commands: /impeccable ')).toBe(true);
-    expect(result).toContain('/impeccable audit');
-    expect(result).toContain('/impeccable polish');
+    expect(result.startsWith('Commands: /design-doctor ')).toBe(true);
+    expect(result).toContain('/design-doctor audit');
+    expect(result).toContain('/design-doctor polish');
   });
 
   test('should replace multiple placeholders in the same string', () => {
@@ -658,37 +658,37 @@ describe('replacePlaceholders', () => {
 
   test('should replace Codex command invocations without rewriting paths', () => {
     const source = [
-      'Run /impeccable audit.',
-      'Use `/impeccable polish` next.',
-      '.github/hooks/impeccable.json',
-      '.codex/skills/impeccable/scripts/context.mjs',
-      'https://example.com/impeccable',
+      'Run /design-doctor audit.',
+      'Use `/design-doctor polish` next.',
+      '.github/hooks/design-doctor.json',
+      '.codex/skills/design-doctor/scripts/context.mjs',
+      'https://example.com/design-doctor',
     ].join('\n');
 
-    const result = replacePlaceholders(source, 'codex', [], ['impeccable']);
+    const result = replacePlaceholders(source, 'codex', [], ['design-doctor']);
 
-    expect(result).toContain('Run $impeccable audit.');
-    expect(result).toContain('Use `$impeccable polish` next.');
-    expect(result).toContain('.github/hooks/impeccable.json');
-    expect(result).toContain('.codex/skills/impeccable/scripts/context.mjs');
-    expect(result).toContain('https://example.com/impeccable');
+    expect(result).toContain('Run $design-doctor audit.');
+    expect(result).toContain('Use `$design-doctor polish` next.');
+    expect(result).toContain('.github/hooks/design-doctor.json');
+    expect(result).toContain('.codex/skills/design-doctor/scripts/context.mjs');
+    expect(result).toContain('https://example.com/design-doctor');
   });
 });
 
 describe('replaceScriptProviderMarker', () => {
   test('renders only the explicit command-prefix declaration', () => {
     const source = [
-      "export const IMPECCABLE_COMMAND_PREFIX = '/'; // @impeccable-provider-command-prefix",
-      'const regex = /impeccable\\b/gi;',
-      "const runtime = '/src/lib/impeccable/__runtime.js';",
-      "const text = 'Run /impeccable audit';",
+      "export const DESIGN_DOCTOR_COMMAND_PREFIX = '/'; // @design-doctor-provider-command-prefix",
+      'const regex = /design-doctor\\b/gi;',
+      "const runtime = '/src/lib/design-doctor/__runtime.js';",
+      "const text = 'Run /design-doctor audit';",
     ].join('\n');
 
     const result = replaceScriptProviderMarker(source, 'codex');
 
-    expect(result).toContain('export const IMPECCABLE_COMMAND_PREFIX = "$";');
-    expect(result).toContain('const regex = /impeccable\\b/gi;');
-    expect(result).toContain("const runtime = '/src/lib/impeccable/__runtime.js';");
-    expect(result).toContain("const text = 'Run /impeccable audit';");
+    expect(result).toContain('export const DESIGN_DOCTOR_COMMAND_PREFIX = "$";');
+    expect(result).toContain('const regex = /design-doctor\\b/gi;');
+    expect(result).toContain("const runtime = '/src/lib/design-doctor/__runtime.js';");
+    expect(result).toContain("const text = 'Run /design-doctor audit';");
   });
 });

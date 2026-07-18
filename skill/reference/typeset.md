@@ -131,7 +131,7 @@ Build a clear type scale:
 
 Answer each item above by citing the file, selector, or value that satisfies it; never a bare yes. Then re-run the pre-scan and fix until the count of unresolved items and unaccepted findings is zero.
 
-When the type carries the hierarchy on its own, hand off to `{{command_prefix}}impeccable polish` for the final pass.
+When the type carries the hierarchy on its own, hand off to `{{command_prefix}}design-doctor polish` for the final pass.
 
 ## Live-mode signature params
 

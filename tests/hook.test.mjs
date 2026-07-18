@@ -1,5 +1,5 @@
 /**
- * Unit tests for the Impeccable design hook.
+ * Unit tests for the Design Doctor design hook.
  * Run: node --test tests/hook.test.mjs
  *
  * Exercises hook-lib.mjs through `runHook()` with an injected detector so the
@@ -57,7 +57,7 @@ import {
 import { detectHtml, detectText } from '../cli/engine/detect-antipatterns.mjs';
 
 function mkTmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-hook-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-hook-'));
 }
 
 function fakeDetector(findings) {
@@ -138,7 +138,7 @@ describe('readConfig()', () => {
   });
 
   it('parses hook runtime and legacy hook detector filters', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: {
         enabled: false,
@@ -158,7 +158,7 @@ describe('readConfig()', () => {
   });
 
   it('merges shared config first and local config second', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: {
         enabled: false,
@@ -202,14 +202,14 @@ describe('readConfig()', () => {
   });
 
   it('tolerates malformed JSON and falls back to defaults', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), '{ not json');
     const cfg = readConfig(cwd);
     assert.equal(cfg.enabled, true);
   });
 
   it('ignores malformed local config while preserving valid shared config', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: {
         enabled: false,
@@ -225,7 +225,7 @@ describe('readConfig()', () => {
   });
 
   it('parses detector.extensions entries and defaults engine to html', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       detector: {
         extensions: [
@@ -249,7 +249,7 @@ describe('readConfig()', () => {
   });
 
   it('lets local-config detector.extensions override the shared engine per ext', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       detector: { extensions: [{ ext: '.blade.php', engine: 'html' }] },
     }));
@@ -268,7 +268,7 @@ describe('readConfig()', () => {
   });
 
   it('parses the new quiet and auditLog fields from the unified config', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       hook: { quiet: true, auditLog: '~/hook.ndjson' },
       detector: { designSystem: { enabled: false } },
@@ -343,14 +343,14 @@ describe('ensureHookGitExcludes()', () => {
     assert.equal(fs.existsSync(path.join(cwd, '.gitignore')), false);
 
     const exclude = fs.readFileSync(path.join(cwd, '.git', 'info', 'exclude'), 'utf-8');
-    assert.match(exclude, /\.impeccable\/hook\.cache\.json/);
-    assert.match(exclude, /\.impeccable\/hook\.pending\.json/);
-    assert.match(exclude, /\.impeccable\/config\.local\.json/);
+    assert.match(exclude, /\.design-doctor\/hook\.cache\.json/);
+    assert.match(exclude, /\.design-doctor\/hook\.pending\.json/);
+    assert.match(exclude, /\.design-doctor\/config\.local\.json/);
 
     const second = ensureHookGitExcludes(cwd);
     assert.equal(second.changed, false);
     const rewritten = fs.readFileSync(path.join(cwd, '.git', 'info', 'exclude'), 'utf-8');
-    assert.equal((rewritten.match(/impeccable-hook-ignore-start/g) || []).length, 1);
+    assert.equal((rewritten.match(/design-doctor-hook-ignore-start/g) || []).length, 1);
   });
 });
 
@@ -388,9 +388,9 @@ describe('filterFindings()', () => {
 
   it('does not treat source comments as hook suppression', () => {
     const content = [
-      '/* impeccable: ignore * */',
+      '/* design-doctor: ignore * */',
       '.card { font-family: "Roboto", sans-serif; }',
-      '<!-- impeccable: ignore side-tab -->',
+      '<!-- design-doctor: ignore side-tab -->',
       '<div style="border-left: 4px solid #7c3aed; border-radius: 16px;">Card</div>',
     ].join('\n');
     const filtered = filterFindings(
@@ -560,12 +560,12 @@ describe('hook-admin.mjs', () => {
     assert.equal(local.ignoreValues[0].reason, 'Still intentional');
 
     const status = runAdmin(['status']);
-    assert.match(status, /local file:\s+\.impeccable\/config\.local\.json/);
+    assert.match(status, /local file:\s+\.design-doctor\/config\.local\.json/);
     assert.match(status, /ignoreValues:\s+overused-font=inter/);
   });
 
-  it('a /impeccable hooks edit preserves sibling hook fields (consent, quiet)', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+  it('a /design-doctor hooks edit preserves sibling hook fields (consent, quiet)', () => {
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     // A recorded per-developer consent in the local file...
     fs.writeFileSync(getLocalConfigPath(cwd), JSON.stringify({ hook: { consent: 'declined' } }));
     runAdmin(['ignore-value', 'overused-font', 'Inter', '--local']);
@@ -582,17 +582,17 @@ describe('hook-admin.mjs', () => {
   });
 
   it('hooks on accepts declined consent and installs missing provider manifests', () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getLocalConfigPath(cwd), JSON.stringify({ hook: { consent: 'declined', quiet: true } }));
     for (const provider of ['.claude', '.agents', '.cursor', '.github']) {
-      fs.mkdirSync(path.join(cwd, provider, 'skills', 'impeccable', 'scripts'), { recursive: true });
+      fs.mkdirSync(path.join(cwd, provider, 'skills', 'design-doctor', 'scripts'), { recursive: true });
     }
     fs.mkdirSync(path.join(cwd, '.claude'), { recursive: true });
     fs.writeFileSync(path.join(cwd, '.claude', 'settings.local.json'), JSON.stringify({
       hooks: {
         PostToolUse: [
           { matcher: 'OtherTool', hooks: [{ type: 'command', command: 'node "./local-hook.mjs"' }] },
-          { matcher: 'Edit', hooks: [{ type: 'command', command: 'node ".claude/skills/impeccable/scripts/hook.mjs"' }] },
+          { matcher: 'Edit', hooks: [{ type: 'command', command: 'node ".claude/skills/design-doctor/scripts/hook.mjs"' }] },
         ],
       },
     }));
@@ -609,15 +609,15 @@ describe('hook-admin.mjs', () => {
 
     const claude = fs.readFileSync(path.join(cwd, '.claude', 'settings.local.json'), 'utf-8');
     assert.match(claude, /local-hook\.mjs/);
-    assert.equal(claude.split('skills/impeccable/scripts/hook.mjs').length - 1, 1);
+    assert.equal(claude.split('skills/design-doctor/scripts/hook.mjs').length - 1, 1);
 
     const codex = fs.readFileSync(path.join(cwd, '.codex', 'hooks.json'), 'utf-8');
-    assert.match(codex, /\.agents\/skills\/impeccable\/scripts\/hook\.mjs/);
+    assert.match(codex, /\.agents\/skills\/design-doctor\/scripts\/hook\.mjs/);
     const cursor = fs.readFileSync(path.join(cwd, '.cursor', 'hooks.json'), 'utf-8');
-    assert.match(cursor, /\.cursor\/skills\/impeccable\/scripts\/hook-before-edit\.mjs/);
-    const github = JSON.parse(fs.readFileSync(path.join(cwd, '.github', 'hooks', 'impeccable.json'), 'utf-8'));
+    assert.match(cursor, /\.cursor\/skills\/design-doctor\/scripts\/hook-before-edit\.mjs/);
+    const github = JSON.parse(fs.readFileSync(path.join(cwd, '.github', 'hooks', 'design-doctor.json'), 'utf-8'));
     assert.equal(github.hooks.postToolUse[0].matcher, 'edit|create|apply_patch');
-    assert.match(github.hooks.postToolUse[0].bash, /\.github\/skills\/impeccable\/scripts\/hook\.mjs/);
+    assert.match(github.hooks.postToolUse[0].bash, /\.github\/skills\/design-doctor\/scripts\/hook\.mjs/);
   });
 
   it('ignore-rule overused-font requires explicit broad suppression', () => {
@@ -682,7 +682,7 @@ describe('renderTemplate()', () => {
       finding('side-tab', i + 1, { name: `R${i}`, description: 'd' }));
     const text = renderTemplate(findings, '/x/Card.tsx', DEFAULT_CONFIG, { cwd: '/x' });
     assert.ok(text.startsWith(`${ENVELOPE_PREFIX} Design hook findings requiring review in Card.tsx (12 issue(s)):`));
-    assert.match(text, /\.\.\. and 7 more \(see \/impeccable audit\)\./);
+    assert.match(text, /\.\.\. and 7 more \(see \/design-doctor audit\)\./);
     // Exactly 5 finding lines.
     const lines = text.split('\n').filter((l) => l.startsWith('- '));
     assert.equal(lines.length, 5);
@@ -707,12 +707,12 @@ describe('renderTemplate()', () => {
     assert.match(text, /Do not change intentional design just to satisfy the hook/);
     assert.match(text, /Suppress a finding only after the user explicitly confirms it is intentional/);
     assert.match(text, /do not silence a real finding with an inline ignore comment/);
-    assert.match(text, /inline `impeccable-disable <rule>` comment only when the waiver must travel with a file/);
+    assert.match(text, /inline `design-doctor-disable <rule>` comment only when the waiver must travel with a file/);
     assert.match(text, /ignore-value \.\.\. --shared/);
     assert.match(text, /ignore-rule overused-font --all-values/);
-    assert.match(text, /\/impeccable hooks ignore-file Card\.tsx/);
+    assert.match(text, /\/design-doctor hooks ignore-file Card\.tsx/);
     assert.match(text, /ignore-rule <id>/);
-    assert.match(text, /\/impeccable audit/);
+    assert.match(text, /\/design-doctor audit/);
   });
 
   it('shows the exact value-specific command for overused-font findings', () => {
@@ -720,7 +720,7 @@ describe('renderTemplate()', () => {
       [finding('overused-font', 1, { name: 'Overused font', snippet: 'body { font-family: "Roboto", sans-serif; }' })],
       '/x/fonts.css', DEFAULT_CONFIG, { cwd: '/x' }
     );
-    assert.match(text, /\/impeccable hooks ignore-value overused-font Roboto --shared/);
+    assert.match(text, /\/design-doctor hooks ignore-value overused-font Roboto --shared/);
     assert.match(text, /ignore-rule overused-font --all-values/);
   });
 
@@ -729,7 +729,7 @@ describe('renderTemplate()', () => {
       [finding('bounce-easing', 1, { name: 'Bounce or elastic easing', snippet: 'animation: bounce-ball' })],
       '/x/main.css', DEFAULT_CONFIG, { cwd: '/x' }
     );
-    assert.match(text, /\/impeccable hooks ignore-value bounce-easing bounce-ball --shared/);
+    assert.match(text, /\/design-doctor hooks ignore-value bounce-easing bounce-ball --shared/);
   });
 
   it('drops the L<line> prefix when line is 0', () => {
@@ -748,7 +748,7 @@ describe('renderTemplate()', () => {
       })],
       '/x/a.tsx', DEFAULT_CONFIG, { cwd: '/x' }
     );
-    assert.doesNotMatch(text, /\/impeccable hooks ignore-value side-tab Inter/);
+    assert.doesNotMatch(text, /\/design-doctor hooks ignore-value side-tab Inter/);
   });
 
   it('clamps oversize output to maxChars', () => {
@@ -766,10 +766,10 @@ describe('writeAuditLog()', () => {
   beforeEach(() => { cwd = mkTmp(); });
   afterEach(() => fs.rmSync(cwd, { recursive: true, force: true }));
 
-  it('appends NDJSON when IMPECCABLE_HOOK_LOG is set', () => {
+  it('appends NDJSON when DESIGN_DOCTOR_HOOK_LOG is set', () => {
     const log = path.join(cwd, 'audit.ndjson');
-    writeAuditLog({ IMPECCABLE_HOOK_LOG: log }, { event: 'PostToolUse', emitted: true });
-    writeAuditLog({ IMPECCABLE_HOOK_LOG: log }, { event: 'PostToolUse', emitted: false });
+    writeAuditLog({ DESIGN_DOCTOR_HOOK_LOG: log }, { event: 'PostToolUse', emitted: true });
+    writeAuditLog({ DESIGN_DOCTOR_HOOK_LOG: log }, { event: 'PostToolUse', emitted: false });
     const body = fs.readFileSync(log, 'utf-8');
     assert.equal(body.trim().split('\n').length, 2);
     for (const line of body.trim().split('\n')) {
@@ -778,13 +778,13 @@ describe('writeAuditLog()', () => {
     }
   });
 
-  it('is a no-op when IMPECCABLE_HOOK_LOG is unset', () => {
+  it('is a no-op when DESIGN_DOCTOR_HOOK_LOG is unset', () => {
     assert.equal(writeAuditLog({}, { event: 'x' }, cwd), false);
   });
 
   it('falls back to the unified config hook.auditLog when the env var is unset', () => {
     const log = path.join(cwd, 'from-config.ndjson');
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ hook: { auditLog: log } }));
     assert.equal(writeAuditLog({}, { event: 'PostToolUse' }, cwd), true);
     assert.equal(fs.readFileSync(log, 'utf-8').trim().split('\n').length, 1);
@@ -793,9 +793,9 @@ describe('writeAuditLog()', () => {
   it('prefers the env var over config hook.auditLog', () => {
     const envLog = path.join(cwd, 'from-env.ndjson');
     const cfgLog = path.join(cwd, 'from-config.ndjson');
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ hook: { auditLog: cfgLog } }));
-    writeAuditLog({ IMPECCABLE_HOOK_LOG: envLog }, { event: 'PostToolUse' }, cwd);
+    writeAuditLog({ DESIGN_DOCTOR_HOOK_LOG: envLog }, { event: 'PostToolUse' }, cwd);
     assert.equal(fs.existsSync(envLog), true);
     assert.equal(fs.existsSync(cfgLog), false);
   });
@@ -803,8 +803,8 @@ describe('writeAuditLog()', () => {
   it('resolves config auditLog from entry.cwd (the event project root), not the fallback cwd', () => {
     const projectDir = path.join(cwd, 'project');
     const log = path.join(cwd, 'event-cwd.ndjson');
-    fs.mkdirSync(path.join(projectDir, '.impeccable'), { recursive: true });
-    fs.writeFileSync(path.join(projectDir, '.impeccable', 'config.json'),
+    fs.mkdirSync(path.join(projectDir, '.design-doctor'), { recursive: true });
+    fs.writeFileSync(path.join(projectDir, '.design-doctor', 'config.json'),
       JSON.stringify({ hook: { auditLog: log } }));
     // The fallback cwd (root) has no config; entry.cwd points at the project.
     assert.equal(writeAuditLog({}, { event: 'PostToolUse', cwd: projectDir }, cwd), true);
@@ -813,8 +813,8 @@ describe('writeAuditLog()', () => {
 
   it('resolves a relative auditLog path against the project root, not the process cwd', () => {
     const projectDir = path.join(cwd, 'project');
-    fs.mkdirSync(path.join(projectDir, '.impeccable'), { recursive: true });
-    fs.writeFileSync(path.join(projectDir, '.impeccable', 'config.json'),
+    fs.mkdirSync(path.join(projectDir, '.design-doctor'), { recursive: true });
+    fs.writeFileSync(path.join(projectDir, '.design-doctor', 'config.json'),
       JSON.stringify({ hook: { auditLog: 'logs/hook.ndjson' } }));
     assert.equal(writeAuditLog({}, { event: 'PostToolUse', cwd: projectDir }, cwd), true);
     // Written under the project root, not the fallback cwd.
@@ -986,7 +986,7 @@ rounded:
     assert.equal(r.exitCode, 0);
     assert.ok(r.stdout.includes(ENVELOPE_PREFIX));
     assert.match(r.stdout, /No deterministic design-quality issues found/);
-    assert.match(r.stdout, /keep following the project design system and the impeccable skill guidance/);
+    assert.match(r.stdout, /keep following the project design system and the design-doctor skill guidance/);
     assert.equal(r.audit.emitted, true);
     assert.equal(r.audit.kind, 'clean');
   });
@@ -1027,7 +1027,7 @@ rounded:
     assert.equal(second.audit.skipped, 'non-ui-ack');
   });
 
-  it('IMPECCABLE_HOOK_QUIET=1 suppresses clean and pending acks, keeps findings emission', async () => {
+  it('DESIGN_DOCTOR_HOOK_QUIET=1 suppresses clean and pending acks, keeps findings emission', async () => {
     // The opt-out kill switch for users who want the old silent-on-clean
     // behavior. Findings still emit because those are real signals; the
     // QUIET switch only quiets the conversational acks.
@@ -1038,7 +1038,7 @@ rounded:
     const detClean = fakeDetector([]);
     const rClean = await runHook({
       stdinJson: JSON.stringify(eventFor(fileA)),
-      env: { IMPECCABLE_HOOK_QUIET: '1' }, cwd, detector: detClean,
+      env: { DESIGN_DOCTOR_HOOK_QUIET: '1' }, cwd, detector: detClean,
     });
     assert.equal(rClean.stdout, '');
     assert.equal(rClean.audit.emitted, false);
@@ -1048,7 +1048,7 @@ rounded:
     const detFindings = fakeDetector([finding('side-tab', 1)]);
     const rFindings = await runHook({
       stdinJson: JSON.stringify(eventFor(fileB)),
-      env: { IMPECCABLE_HOOK_QUIET: '1' }, cwd, detector: detFindings,
+      env: { DESIGN_DOCTOR_HOOK_QUIET: '1' }, cwd, detector: detFindings,
     });
     assert.ok(rFindings.stdout.includes(ENVELOPE_PREFIX));
     assert.match(rFindings.stdout, /Design hook findings requiring review/);
@@ -1056,7 +1056,7 @@ rounded:
   });
 
   it('config quiet:true suppresses the clean ack like the env switch', async () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ hook: { quiet: true } }));
     const file = writeFixture('src/Quiet.tsx', 'noop');
     const r = await runHook({
@@ -1067,12 +1067,12 @@ rounded:
     assert.equal(r.audit.quiet, true);
   });
 
-  it('re-entrancy guard short-circuits when IMPECCABLE_HOOK_DEPTH is set', async () => {
+  it('re-entrancy guard short-circuits when DESIGN_DOCTOR_HOOK_DEPTH is set', async () => {
     const file = writeFixture('src/Card.tsx', 'noop');
     const det = fakeDetector([finding('side-tab', 1)]);
     const r = await runHook({
       stdinJson: JSON.stringify(eventFor(file)),
-      env: { IMPECCABLE_HOOK_DEPTH: '1' },
+      env: { DESIGN_DOCTOR_HOOK_DEPTH: '1' },
       cwd,
       detector: det,
     });
@@ -1093,13 +1093,13 @@ rounded:
     assert.equal(r.audit.reentrant, true);
   });
 
-  it('IMPECCABLE_HOOK_DISABLED kill switch', async () => {
+  it('DESIGN_DOCTOR_HOOK_DISABLED kill switch', async () => {
     const file = writeFixture('src/Card.tsx', 'noop');
     const det = fakeDetector([finding('side-tab', 1)]);
     for (const v of ['1', 'true', 'yes', 'on', 'TRUE']) {
       const r = await runHook({
         stdinJson: JSON.stringify(eventFor(file)),
-        env: { IMPECCABLE_HOOK_DISABLED: v },
+        env: { DESIGN_DOCTOR_HOOK_DISABLED: v },
         cwd,
         detector: det,
       });
@@ -1110,7 +1110,7 @@ rounded:
 
   it('config-disabled silences cleanly', async () => {
     const file = writeFixture('src/Card.tsx', 'noop');
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ hook: { enabled: false } }));
     const det = fakeDetector([finding('side-tab', 1)]);
     const r = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
@@ -1168,7 +1168,7 @@ rounded:
 
   it('respects detector.designSystem.enabled=false', async () => {
     writeDesignMd();
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       detector: { designSystem: { enabled: false } },
     }));
@@ -1187,7 +1187,7 @@ rounded:
 
   it('suppresses design-system findings through ignore-value', async () => {
     writeDesignMd();
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       detector: {
         ignoreValues: [
@@ -1225,8 +1225,8 @@ rounded:
     });
 
     assert.match(r.stdout, /No deterministic design-quality issues found/);
-    assert.match(r.stdout, /DESIGN\.md is newer than \.impeccable\/design\.json/);
-    assert.match(r.stdout, /\/impeccable document/);
+    assert.match(r.stdout, /DESIGN\.md is newer than \.design-doctor\/design\.json/);
+    assert.match(r.stdout, /\/design-doctor document/);
   });
 
   it('rejects sensitive paths before reading file content', async () => {
@@ -1262,7 +1262,7 @@ rounded:
 
   it('config ignoreFiles glob suppresses', async () => {
     const file = writeFixture('src/legacy/Foo.tsx', 'noop');
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({
       detector: { ignoreFiles: ['src/legacy/**'] },
     }));
@@ -1303,7 +1303,7 @@ rounded:
     }
     assert.ok(r.stdout.includes('Suppressing further design hints'));
     assert.match(r.stdout, /More than 6 edits in this session reached/);
-    assert.match(r.stdout, /Run \/impeccable audit to revisit/);
+    assert.match(r.stdout, /Run \/design-doctor audit to revisit/);
   });
 
   it('handles MultiEdit and apply_patch payload shapes (file_path field)', async () => {
@@ -1363,8 +1363,8 @@ rounded:
     assert.ok(r.audit.findings > 0);
   });
 
-  it('honors an inline impeccable-disable comment so the hook scans the file clean', async () => {
-    // The hook runs the same engine as `npx impeccable detect`, so an in-file
+  it('honors an inline design-doctor-disable comment so the hook scans the file clean', async () => {
+    // The hook runs the same engine as `npx design-doctor detect`, so an in-file
     // waiver suppresses hook findings exactly like a config ignore would.
     const flagged = writeFixture('src/Flagged.tsx', 'const css = "font-family: Inter";');
     const flaggedRun = await runHook({
@@ -1374,7 +1374,7 @@ rounded:
     assert.ok(flaggedRun.audit.findings > 0);
 
     const waived = writeFixture('src/Waived.tsx',
-      'const css = "font-family: Inter"; // impeccable-disable-line overused-font');
+      'const css = "font-family: Inter"; // design-doctor-disable-line overused-font');
     const waivedRun = await runHook({
       stdinJson: JSON.stringify(eventFor(waived)), env: {}, cwd, detector: { detectHtml, detectText },
     });
@@ -1398,9 +1398,9 @@ rounded:
 
 describe('runHook() — cache write gating (issues #344, #305)', () => {
   // The hook must be a no-op on disk in projects that never earned an
-  // `.impeccable/` footprint: skipped files never dirty the cache, and a
+  // `.design-doctor/` footprint: skipped files never dirty the cache, and a
   // dirty cache is only persisted when there are fresh findings or the
-  // project already opted in (an `.impeccable/` dir exists).
+  // project already opted in (an `.design-doctor/` dir exists).
   let cwd;
   beforeEach(() => { cwd = mkTmp(); });
   afterEach(() => fs.rmSync(cwd, { recursive: true, force: true }));
@@ -1422,34 +1422,34 @@ describe('runHook() — cache write gating (issues #344, #305)', () => {
     return abs;
   }
 
-  it('non-UI edit (.md) does not create .impeccable/', async () => {
+  it('non-UI edit (.md) does not create .design-doctor/', async () => {
     const file = write('notes/todo.md', '# notes');
     const r = await runHook({
       stdinJson: JSON.stringify(eventFor(file)),
       env: {}, cwd, detector: fakeDetector([finding('side-tab', 1)]),
     });
     assert.equal(r.audit.skipped, 'extension');
-    assert.ok(!fs.existsSync(path.join(cwd, '.impeccable')), '.impeccable should not exist');
+    assert.ok(!fs.existsSync(path.join(cwd, '.design-doctor')), '.design-doctor should not exist');
   });
 
-  it('clean UI edit in a project with no footprint does not create .impeccable/, still acks', async () => {
+  it('clean UI edit in a project with no footprint does not create .design-doctor/, still acks', async () => {
     const file = write('src/Card.tsx', 'noop');
     const r = await runHook({
       stdinJson: JSON.stringify(eventFor(file)),
       env: {}, cwd, detector: fakeDetector([]),
     });
     assert.match(r.stdout, /No deterministic design-quality issues found/);
-    assert.ok(!fs.existsSync(path.join(cwd, '.impeccable')), '.impeccable should not exist');
+    assert.ok(!fs.existsSync(path.join(cwd, '.design-doctor')), '.design-doctor should not exist');
   });
 
-  it('detector-missing path does not create .impeccable/', async () => {
+  it('detector-missing path does not create .design-doctor/', async () => {
     const file = write('src/Card.tsx', 'noop');
     const r = await runHook({
       stdinJson: JSON.stringify(eventFor(file)),
       env: {}, cwd, detector: {},
     });
     assert.equal(r.audit.skipped, 'detector-missing');
-    assert.ok(!fs.existsSync(path.join(cwd, '.impeccable')), '.impeccable should not exist');
+    assert.ok(!fs.existsSync(path.join(cwd, '.design-doctor')), '.design-doctor should not exist');
   });
 
   it('fresh findings create the cache, and dedup works on the next run', async () => {
@@ -1457,15 +1457,15 @@ describe('runHook() — cache write gating (issues #344, #305)', () => {
     const det = fakeDetector([finding('side-tab', 1)]);
     const first = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
     assert.match(first.stdout, /Design hook findings requiring review/);
-    assert.ok(fs.existsSync(path.join(cwd, '.impeccable', 'hook.cache.json')), 'cache should exist');
+    assert.ok(fs.existsSync(path.join(cwd, '.design-doctor', 'hook.cache.json')), 'cache should exist');
 
     const second = await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: det });
     assert.doesNotMatch(second.stdout, /Design hook findings requiring review/);
     assert.match(second.stdout, /flagged earlier this session/);
   });
 
-  it('clean UI edit in an opted-in project (existing .impeccable/) still persists editCount', async () => {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+  it('clean UI edit in an opted-in project (existing .design-doctor/) still persists editCount', async () => {
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     const file = write('src/Card.tsx', 'noop');
     await runHook({ stdinJson: JSON.stringify(eventFor(file)), env: {}, cwd, detector: fakeDetector([]) });
 
@@ -1474,7 +1474,7 @@ describe('runHook() — cache write gating (issues #344, #305)', () => {
   });
 
   it('umbrella launch keys the cache to the edited file\'s project root', async () => {
-    // cwd is the umbrella: no .git / package.json / .impeccable of its own.
+    // cwd is the umbrella: no .git / package.json / .design-doctor of its own.
     write('app/package.json', '{"name":"child"}');
     const file = write('app/src/Card.tsx', 'noop');
     const child = path.join(cwd, 'app');
@@ -1484,8 +1484,8 @@ describe('runHook() — cache write gating (issues #344, #305)', () => {
     });
     assert.match(r.stdout, /Design hook findings requiring review/);
     assert.equal(r.audit.cwd, child);
-    assert.ok(fs.existsSync(path.join(child, '.impeccable', 'hook.cache.json')), 'cache should land in the child project');
-    assert.ok(!fs.existsSync(path.join(cwd, '.impeccable')), 'umbrella root should stay clean');
+    assert.ok(fs.existsSync(path.join(child, '.design-doctor', 'hook.cache.json')), 'cache should land in the child project');
+    assert.ok(!fs.existsSync(path.join(cwd, '.design-doctor')), 'umbrella root should stay clean');
   });
 });
 
@@ -1495,7 +1495,7 @@ describe('resolveCacheCwd()', () => {
   afterEach(() => fs.rmSync(cwd, { recursive: true, force: true }));
 
   it('keeps the session cwd when it already looks like a project root', () => {
-    for (const marker of ['.git', '.impeccable']) {
+    for (const marker of ['.git', '.design-doctor']) {
       const dir = path.join(cwd, `root-${marker}`);
       fs.mkdirSync(path.join(dir, marker), { recursive: true });
       const file = path.join(dir, 'nested', 'app', 'src', 'Card.tsx');
@@ -1523,11 +1523,11 @@ describe('resolveCacheCwd()', () => {
 });
 
 describe('suppressionNotice()', () => {
-  it('starts with envelope and mentions /impeccable audit', () => {
+  it('starts with envelope and mentions /design-doctor audit', () => {
     const text = suppressionNotice('src/Card.tsx');
     assert.ok(text.startsWith(ENVELOPE_PREFIX));
     assert.match(text, /More than 6 edits in this session reached/);
-    assert.match(text, /\/impeccable audit/);
+    assert.match(text, /\/design-doctor audit/);
   });
 });
 
@@ -1625,8 +1625,8 @@ describe('matchConfiguredExtension()', () => {
 describe('renderCleanAck() / renderPendingAck()', () => {
   it('renderCleanAck stays short and ends with the steer line', () => {
     const text = renderCleanAck('/x/src/App.jsx', { cwd: '/x' });
-    assert.match(text, /^\[impeccable@1\] Design hook scanned src\/App\.jsx\. No deterministic design-quality issues found\./);
-    assert.match(text, /keep following the project design system and the impeccable skill guidance/);
+    assert.match(text, /^\[design-doctor@1\] Design hook scanned src\/App\.jsx\. No deterministic design-quality issues found\./);
+    assert.match(text, /keep following the project design system and the design-doctor skill guidance/);
     // Budget guard: should fit comfortably under a single context-message
     // injection (~200 chars). Hard upper bound 240 chars.
     assert.ok(text.length < 240, `clean ack too long: ${text.length} chars`);
@@ -1635,7 +1635,7 @@ describe('renderCleanAck() / renderPendingAck()', () => {
   it('renderPendingAck quotes up to 3 known findings and counts the rest', () => {
     const known = ['side-tab:3', 'gradient-text:4', 'ai-color-palette:8', 'overused-font:12'];
     const text = renderPendingAck('/x/src/SlopCard.jsx', known, { cwd: '/x' });
-    assert.match(text, /^\[impeccable@1\] Design hook scanned src\/SlopCard\.jsx\./);
+    assert.match(text, /^\[design-doctor@1\] Design hook scanned src\/SlopCard\.jsx\./);
     assert.match(text, /Still has 4 finding\(s\) flagged earlier this session/);
     assert.match(text, /side-tab:3, gradient-text:4, ai-color-palette:8/);
     assert.match(text, /\+1 more/); // 4 total, 3 shown
@@ -1689,7 +1689,7 @@ describe('resolveTargetFiles()', () => {
 
 describe('resolveHarness() / normalizeHookEvent()', () => {
   it('routes explicit env and Cursor conversation_id to cursor harness', () => {
-    assert.equal(resolveHarness({ IMPECCABLE_HOOK_HARNESS: 'cursor' }), 'cursor');
+    assert.equal(resolveHarness({ DESIGN_DOCTOR_HOOK_HARNESS: 'cursor' }), 'cursor');
     assert.equal(resolveHarness({}, { conversation_id: 'c1' }), 'cursor');
     assert.equal(resolveHarness({}), 'claude');
   });
@@ -1709,7 +1709,7 @@ describe('resolveHarness() / normalizeHookEvent()', () => {
   it('routes a GitHub Copilot postToolUse event (toolName/toolArgs) to the github harness', () => {
     const event = { sessionId: 's1', cwd: '/proj', toolName: 'edit', toolArgs: '{"path":"src/App.tsx"}' };
     assert.equal(resolveHarness({}, event), 'github');
-    assert.equal(resolveHarness({ IMPECCABLE_HOOK_HARNESS: 'github' }), 'github');
+    assert.equal(resolveHarness({ DESIGN_DOCTOR_HOOK_HARNESS: 'github' }), 'github');
     // A Claude/Codex event (tool_name/tool_input) must not be mistaken for github.
     assert.equal(resolveHarness({}, { tool_name: 'Edit', tool_input: { file_path: 'a.tsx' } }), 'claude');
   });
@@ -1834,7 +1834,7 @@ describe('expandScanTargets()', () => {
   });
 
   it('does not follow imports from traversal-looking primary targets', () => {
-    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-hook-outside-'));
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-hook-outside-'));
     try {
       fs.writeFileSync(path.join(outside, 'App.jsx'), "import './styles.css';\nexport default function App() { return null; }");
       fs.writeFileSync(path.join(outside, 'styles.css'), "body { font-family: 'Inter', sans-serif; }");
@@ -1986,7 +1986,7 @@ describe('runHook() — co-located stylesheet scan', () => {
   });
 
   it('does not scan imported styles from a traversal-looking primary path', async () => {
-    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-hook-outside-'));
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-hook-outside-'));
     try {
       fs.writeFileSync(path.join(outside, 'App.jsx'), "import './styles.css';\nexport default function App() { return null; }");
       fs.writeFileSync(path.join(outside, 'styles.css'), "body { font-family: 'Inter', sans-serif; }");
@@ -2061,7 +2061,7 @@ describe('runHook() — configured template extensions (issue #316)', () => {
   }
 
   function writeExtensionsConfig(extensions) {
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     fs.writeFileSync(getConfigPath(cwd), JSON.stringify({ detector: { extensions } }));
   }
 
@@ -2173,7 +2173,7 @@ describe('Cursor hook scripts', () => {
           `,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: logPath },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: logPath },
       encoding: 'utf-8',
     });
 
@@ -2209,7 +2209,7 @@ describe('Cursor hook scripts', () => {
           `,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2228,7 +2228,7 @@ describe('Cursor hook scripts', () => {
           streamContent: 'export default function Card() { return <section className="card">Hello</section>; }',
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2251,7 +2251,7 @@ describe('Cursor hook scripts', () => {
         tool_name: 'Write',
         tool_input: { file_path: filePath, content },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2259,8 +2259,8 @@ describe('Cursor hook scripts', () => {
     assert.equal(JSON.parse(run()).permission, 'allow');
 
     // With a detector.extensions entry the same proposed write is scanned and denied.
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
-    fs.writeFileSync(path.join(cwd, '.impeccable', 'config.json'), JSON.stringify({
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
+    fs.writeFileSync(path.join(cwd, '.design-doctor', 'config.json'), JSON.stringify({
       detector: { extensions: [{ ext: '.blade.php' }] },
     }));
     const payload = JSON.parse(run());
@@ -2274,8 +2274,8 @@ describe('Cursor hook scripts', () => {
     // no such rule), so a denial here proves the proposed content went through
     // detectHtml rather than the old always-detectText path.
     const filePath = path.join(cwd, 'resources/views/hero.blade.php');
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
-    fs.writeFileSync(path.join(cwd, '.impeccable', 'config.json'), JSON.stringify({
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
+    fs.writeFileSync(path.join(cwd, '.design-doctor', 'config.json'), JSON.stringify({
       detector: { extensions: [{ ext: '.blade.php' }] },
     }));
 
@@ -2290,7 +2290,7 @@ describe('Cursor hook scripts', () => {
           content: '<style>h1 { font-size: 84px; }</style>\n<h1>This is a very long headline that keeps going on and on for a while</h1>',
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2311,7 +2311,7 @@ describe('Cursor hook scripts', () => {
           command: `cat > "${filePath}" <<'EOF'\n<style>.card { border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px; }</style>\n<div class="card">Hello</div>\nEOF\n`,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2333,7 +2333,7 @@ describe('Cursor hook scripts', () => {
           command: `python3 - <<'PY'\nfrom pathlib import Path\npath = Path('${filePath}')\npath.write_text('''<style>.card { border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px; }</style>\n<div class="card">Hello</div>\n''', encoding='utf-8')\nPY\n`,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2355,7 +2355,7 @@ describe('Cursor hook scripts', () => {
           command: `cat >> "${filePath}" <<'EOF'\n<style>.card { border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px; }</style>\n<div class="card">Hello</div>\nEOF\n`,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2377,7 +2377,7 @@ describe('Cursor hook scripts', () => {
           command: `cat <<'EOF' | tee -a "${filePath}"\n<style>.card { border-left: 4px solid #7c3aed; border-radius: 16px; padding: 16px; }</style>\n<div class="card">Hello</div>\nEOF\n`,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2406,7 +2406,7 @@ describe('Cursor hook scripts', () => {
           command: `cp "${sourcePath}" "${destPath}"`,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2435,7 +2435,7 @@ describe('Cursor hook scripts', () => {
           new_string: newString,
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2458,7 +2458,7 @@ describe('Cursor hook scripts', () => {
           new_string: '<div style="border-left: 4px solid #7c3aed; border-radius: 16px;">Hello</div>',
         },
       }),
-      env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+      env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
       encoding: 'utf-8',
     });
 
@@ -2483,7 +2483,7 @@ describe('Cursor hook scripts', () => {
       const out = execFileSync(process.execPath, [path.join('skill', 'scripts', 'hook-before-edit.mjs')], {
         cwd: path.resolve('.'),
         input,
-        env: { ...process.env, IMPECCABLE_HOOK_LOG: '' },
+        env: { ...process.env, DESIGN_DOCTOR_HOOK_LOG: '' },
         encoding: 'utf-8',
       });
       payload = JSON.parse(out);
@@ -2496,7 +2496,7 @@ describe('Cursor hook scripts', () => {
     assert.equal(Object.values(denials)[0], 7);
   });
 
-  it('preToolUse honors truthy IMPECCABLE_HOOK_DISABLED values before stdin parsing', () => {
+  it('preToolUse honors truthy DESIGN_DOCTOR_HOOK_DISABLED values before stdin parsing', () => {
     const logPath = path.join(cwd, 'hook.ndjson');
 
     const out = execFileSync(process.execPath, [path.join('skill', 'scripts', 'hook-before-edit.mjs')], {
@@ -2504,8 +2504,8 @@ describe('Cursor hook scripts', () => {
       input: '{not-json',
       env: {
         ...process.env,
-        IMPECCABLE_HOOK_DISABLED: 'true',
-        IMPECCABLE_HOOK_LOG: logPath,
+        DESIGN_DOCTOR_HOOK_DISABLED: 'true',
+        DESIGN_DOCTOR_HOOK_LOG: logPath,
       },
       encoding: 'utf-8',
     });
@@ -2539,7 +2539,7 @@ describe('runHook() — emission enrichment', () => {
         hook_event_name: 'PostToolUse',
         file_path: path.join(cwd, 'src/styles.css'),
       }),
-      env: { IMPECCABLE_HOOK_HARNESS: 'claude' },
+      env: { DESIGN_DOCTOR_HOOK_HARNESS: 'claude' },
       cwd,
       detector: fakeDetector([finding('overused-font', 8)]),
     });

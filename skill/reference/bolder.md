@@ -32,7 +32,7 @@ If any of these are unclear from the codebase, {{ask_instruction}}
 
 **CRITICAL**: "Bolder" does not mean chaotic or garish. It means distinctive, memorable, and confident. Think intentional drama, not random noise.
 
-**WARNING - AI SLOP TRAP**: Review ALL the DON'T guidelines from the parent impeccable skill (already loaded in this context) before proceeding. Bold means distinctive, not "more effects."
+**WARNING - AI SLOP TRAP**: Review ALL the DON'T guidelines from the parent design-doctor skill (already loaded in this context) before proceeding. Bold means distinctive, not "more effects."
 
 ## Design-System Lock
 
@@ -117,4 +117,4 @@ Ensure amplification maintains usability and coherence:
 
 **The test**: If you showed this to someone and said "AI made this bolder," would they believe you immediately? If yes, you've failed. Bold means distinctive, not "more AI effects."
 
-When the result feels right, hand off to `{{command_prefix}}impeccable polish` for the final pass.
+When the result feels right, hand off to `{{command_prefix}}design-doctor polish` for the final pass.

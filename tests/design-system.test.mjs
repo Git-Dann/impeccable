@@ -23,7 +23,7 @@ import {
 const tempDirs = [];
 
 function mkTmp() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-design-system-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-design-system-'));
   tempDirs.push(dir);
   return dir;
 }
@@ -111,11 +111,11 @@ describe('normalizeDesignSystem()', () => {
 });
 
 describe('loadDesignSystemForCwd()', () => {
-  it('loads DESIGN.md plus .impeccable/design.json and marks stale sidecars', () => {
+  it('loads DESIGN.md plus .design-doctor/design.json and marks stale sidecars', () => {
     const cwd = mkTmp();
-    fs.mkdirSync(path.join(cwd, '.impeccable'), { recursive: true });
+    fs.mkdirSync(path.join(cwd, '.design-doctor'), { recursive: true });
     const designMd = path.join(cwd, 'DESIGN.md');
-    const sidecarJson = path.join(cwd, '.impeccable', 'design.json');
+    const sidecarJson = path.join(cwd, '.design-doctor', 'design.json');
 
     fs.writeFileSync(designMd, `---
 typography:

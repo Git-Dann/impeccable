@@ -1,11 +1,11 @@
 /**
- * `impeccable skills` subcommand
+ * `design-doctor skills` subcommand
  *
  * Usage:
- *   impeccable help      Show all available skills and commands
- *   impeccable install   Install compiled skills from the universal bundle
- *   impeccable link      Symlink compiled skills from a local checkout
- *   impeccable update    Update skills to latest version
+ *   design-doctor help      Show all available skills and commands
+ *   design-doctor install   Install compiled skills from the universal bundle
+ *   design-doctor link      Symlink compiled skills from a local checkout
+ *   design-doctor update    Update skills to latest version
  */
 
 import { execSync } from 'node:child_process';
@@ -17,10 +17,34 @@ import { get } from 'node:https';
 import { createHash } from 'node:crypto';
 import { tmpdir, homedir } from 'node:os';
 import { unzipSync } from 'fflate';
-import { getHookConsent, setHookConsent } from '../../lib/impeccable-config.mjs';
+import { getHookConsent, setHookConsent } from '../../lib/design-doctor-config.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const API_BASE = 'https://impeccable.style';
+
+// No Gitwork-hosted distribution API exists (the site + Cloudflare functions
+// that used to serve one were removed with the rebrand). Skills and command
+// metadata are fetched straight from GitHub instead: the skill release's
+// attached `universal.zip` asset, and the command-metadata.json committed at
+// that same release tag.
+const GITHUB_REPO = 'git-dann/impeccable';
+const GITHUB_API_BASE = `https://api.github.com/repos/${GITHUB_REPO}`;
+const GITHUB_USER_AGENT = 'design-doctor-cli';
+
+/**
+ * Find the most recent skill release (tag `skill-v*`, may be interleaved
+ * with `cli-v*`/`ext-v*` releases in the same repo) and return its tag plus
+ * asset list.
+ */
+async function resolveLatestSkillRelease() {
+  const res = await fetch(`${GITHUB_API_BASE}/releases?per_page=30`, {
+    headers: { 'User-Agent': GITHUB_USER_AGENT, Accept: 'application/vnd.github+json' },
+  });
+  if (!res.ok) throw new Error(`GitHub releases lookup failed: HTTP ${res.status}`);
+  const releases = await res.json();
+  const release = releases.find((r) => !r.draft && typeof r.tag_name === 'string' && r.tag_name.startsWith('skill-v'));
+  if (!release) throw new Error(`No published skill-v* release found in ${GITHUB_REPO}`);
+  return release;
+}
 
 // Provider folder names in project roots
 const PROVIDER_DIRS = ['.claude', '.cursor', '.gemini', '.agents', '.github', '.kiro', '.opencode', '.pi', '.qoder', '.trae', '.trae-cn', '.rovodev'];
@@ -87,12 +111,12 @@ const DEFAULT_TARGETS = ['.claude', '.agents'];
 const IGNORED_SKILL_DIR_NAMES = new Set([
   'codex-primary-runtime',
 ]);
-const IMPECCABLE_HOOK_COMMAND_MARKERS = [
-  'skills/impeccable/scripts/hook-probe.mjs',
-  'skills/impeccable/scripts/hook.mjs',
-  'skills/impeccable/scripts/hook-before-edit.mjs',
-  'skills/impeccable/scripts/hook-after-edit.mjs',
-  'skills/impeccable/scripts/hook-stop.mjs',
+const DESIGN_DOCTOR_HOOK_COMMAND_MARKERS = [
+  'skills/design-doctor/scripts/hook-probe.mjs',
+  'skills/design-doctor/scripts/hook.mjs',
+  'skills/design-doctor/scripts/hook-before-edit.mjs',
+  'skills/design-doctor/scripts/hook-after-edit.mjs',
+  'skills/design-doctor/scripts/hook-stop.mjs',
 ];
 const PROVIDER_HOOK_ARTIFACTS = {
   '.claude': [
@@ -115,7 +139,7 @@ const PROVIDER_HOOK_ARTIFACTS = {
   // Claude, this is a team-shared, committed file (not a machine-local override),
   // so source and dest are the same path.
   '.github': [
-    { sourceProvider: '.github', rel: 'hooks/impeccable.json', destProvider: '.github' },
+    { sourceProvider: '.github', rel: 'hooks/design-doctor.json', destProvider: '.github' },
   ],
 };
 
@@ -163,12 +187,12 @@ class PromptAbortError extends Error {
   constructor() {
     super('Aborted.');
     this.name = 'PromptAbortError';
-    this.code = 'IMPECCABLE_PROMPT_ABORT';
+    this.code = 'DESIGN_DOCTOR_PROMPT_ABORT';
   }
 }
 
 function isPromptAbortError(error) {
-  return error?.code === 'IMPECCABLE_PROMPT_ABORT';
+  return error?.code === 'DESIGN_DOCTOR_PROMPT_ABORT';
 }
 
 function canStyleTerminal() {
@@ -430,20 +454,25 @@ async function promptCheckbox(message, options, { selectedValues = [] } = {}) {
 async function showHelp() {
   let commands;
   try {
-    const res = await fetch(`${API_BASE}/api/commands`);
-    commands = await res.json();
+    const release = await resolveLatestSkillRelease();
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${GITHUB_REPO}/${release.tag_name}/skill/scripts/command-metadata.json`,
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const metadata = await res.json();
+    commands = Object.entries(metadata).map(([id, meta]) => ({ id, description: meta.description }));
   } catch {
-    console.error('Could not fetch command list from impeccable.style. Check your network connection.');
+    console.error(`Could not fetch the command list from ${GITHUB_REPO}. Check your network connection.`);
     process.exit(1);
   }
 
   const pad = (s, n) => s + ' '.repeat(Math.max(0, n - s.length));
 
-  console.log('\n  Impeccable Skills & Commands\n');
-  console.log('  Install:  npx impeccable install');
-  console.log('  Link:     npx impeccable link --source=.impeccable');
-  console.log('  Update:   npx impeccable update');
-  console.log('  Docs:     https://impeccable.style/cheatsheet\n');
+  console.log('\n  Design Doctor Skills & Commands\n');
+  console.log('  Install:  npx design-doctor install');
+  console.log('  Link:     npx design-doctor link --source=.design-doctor');
+  console.log('  Update:   npx design-doctor update');
+  console.log(`  Docs:     https://github.com/${GITHUB_REPO}\n`);
   console.log(`  ${pad('Command', 22)} Description`);
   console.log(`  ${'-'.repeat(22)} ${'-'.repeat(52)}`);
 
@@ -460,12 +489,12 @@ async function showHelp() {
 // ─── version helpers ─────────────────────────────────────────────────────────
 
 /**
- * Read the skills version from the impeccable SKILL.md frontmatter.
+ * Read the skills version from the design-doctor SKILL.md frontmatter.
  */
 function getSkillsVersion(root, scope) {
   for (const d of PROVIDER_DIRS) {
     for (const skillsDir of providerSkillsDirCandidates(root, d, scope)) {
-      const skillMd = join(skillsDir, 'impeccable', 'SKILL.md');
+      const skillMd = join(skillsDir, 'design-doctor', 'SKILL.md');
       if (!existsSync(skillMd)) continue;
       const content = readFileSync(skillMd, 'utf-8');
       const match = content.match(/^version:\s*(.+)$/m);
@@ -528,12 +557,16 @@ async function extractZip(zipPath, targetDir) {
  * Caller is responsible for cleanup.
  */
 async function downloadAndExtractBundle() {
-  const localBundle = process.env.IMPECCABLE_BUNDLE_PATH;
+  const localBundle = process.env.DESIGN_DOCTOR_BUNDLE_PATH;
   if (localBundle) return copyOrExtractLocalBundle(localBundle);
 
-  const tmpZip = join(tmpdir(), `impeccable-update-${Date.now()}.zip`);
-  const tmpDir = join(tmpdir(), `impeccable-update-${Date.now()}`);
-  await downloadFile(`${API_BASE}/api/download/bundle/universal`, tmpZip);
+  const release = await resolveLatestSkillRelease();
+  const asset = release.assets?.find((a) => a.name === 'universal.zip');
+  if (!asset) throw new Error(`Release ${release.tag_name} has no universal.zip asset`);
+
+  const tmpZip = join(tmpdir(), `design-doctor-update-${Date.now()}.zip`);
+  const tmpDir = join(tmpdir(), `design-doctor-update-${Date.now()}`);
+  await downloadFile(asset.browser_download_url, tmpZip);
   mkdirSync(tmpDir, { recursive: true });
   await extractZip(tmpZip, tmpDir);
   rmSync(tmpZip, { force: true });
@@ -546,7 +579,7 @@ async function copyOrExtractLocalBundle(sourceValue) {
     throw new Error(`Local bundle not found: ${source}`);
   }
 
-  const tmpDir = join(tmpdir(), `impeccable-local-bundle-${process.pid}-${Date.now()}`);
+  const tmpDir = join(tmpdir(), `design-doctor-local-bundle-${process.pid}-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
 
   if (statSync(source).isDirectory()) {
@@ -603,7 +636,7 @@ function deduplicateProviders(root, providers, scope) {
 /**
  * Compare local skills against a downloaded bundle.
  * Only checks skills that exist in the bundle (ignores user's custom skills
- * that aren't part of impeccable). Deduplicates providers that share the same
+ * that aren't part of design-doctor). Deduplicates providers that share the same
  * real path (symlinks). Compares the full bundled skill tree, not just
  * SKILL.md, so script-only fixes and removed files are detected.
  * Returns true if every bundle skill matches the local copy.
@@ -644,8 +677,8 @@ async function check() {
   const installed = isAlreadyInstalled(root);
 
   if (!installed) {
-    console.log('Impeccable is not installed in this project.');
-    console.log('Run `npx impeccable install` to install.');
+    console.log('Design Doctor is not installed in this project.');
+    console.log('Run `npx design-doctor install` to install.');
     process.exit(0);
   }
 
@@ -662,7 +695,7 @@ async function check() {
       console.log(`Skills are up to date${v ? ` (v${v})` : ''}.`);
     } else {
       console.log('Updates available.');
-      console.log('Run `npx impeccable update` to update.');
+      console.log('Run `npx design-doctor update` to update.');
     }
   } catch (e) {
     console.error(`Could not check for updates: ${e.message}`);
@@ -672,16 +705,16 @@ async function check() {
 
 // ─── skills install ───────────────────────────────────────────────────────────
 
-// Check if impeccable skills are already present in any provider folder
+// Check if design-doctor skills are already present in any provider folder
 function isAlreadyInstalled(root, scope) {
   for (const d of PROVIDER_DIRS) {
     for (const skillsDir of existingSkillsDirs(root, d, scope)) {
       try {
         const entries = readdirSync(skillsDir);
-        // Look for 'impeccable' skill (or prefixed variant, or legacy 'teach-impeccable')
+        // Look for 'design-doctor' skill (or prefixed variant, or legacy 'teach-design-doctor')
         if (entries.some(e =>
-          e === 'impeccable' || e.endsWith('-impeccable') ||
-          e === 'teach-impeccable' || e.endsWith('-teach-impeccable')
+          e === 'design-doctor' || e.endsWith('-design-doctor') ||
+          e === 'teach-design-doctor' || e.endsWith('-teach-design-doctor')
         )) {
           return d;
         }
@@ -721,29 +754,29 @@ function isRealSkillDir(skillsDir, name) {
 
 /**
  * One-way migration for installs from the era when the CLI offered a command
- * prefix (default `i-`), renaming the skill to e.g. `i-impeccable`. The prefix
+ * prefix (default `i-`), renaming the skill to e.g. `i-design-doctor`. The prefix
  * only earned its keep when every command was its own skill; with a single
- * `impeccable` skill it does nothing, so it is no longer offered. Rename any
- * prefixed impeccable skill back to the canonical `impeccable` (the fresh
+ * `design-doctor` skill it does nothing, so it is no longer offered. Rename any
+ * prefixed design-doctor skill back to the canonical `design-doctor` (the fresh
  * install/update content lands there next) so users aren't left with a stale,
- * orphaned `i-impeccable` alongside the new one. Scoped to the impeccable skill
+ * orphaned `i-design-doctor` alongside the new one. Scoped to the design-doctor skill
  * by name -- never touches third-party skills that happen to start with `i-`.
  * Returns the number of skills migrated.
  */
-function migrateUnprefixImpeccable(root, scope) {
+function migrateUnprefixDesignDoctor(root, scope) {
   let migrated = 0;
   for (const d of PROVIDER_DIRS) {
     for (const skillsDir of existingSkillsDirs(root, d, scope)) {
       let entries;
       try { entries = readdirSync(skillsDir); } catch { continue; }
       for (const name of entries) {
-        // A prefixed impeccable skill is `<prefix>impeccable`, not the canonical
-        // `impeccable` and not an unrelated legacy skill name.
-        if (name === 'impeccable' || name === 'teach-impeccable') continue;
-        if (!name.endsWith('-impeccable')) continue;
+        // A prefixed design-doctor skill is `<prefix>design-doctor`, not the canonical
+        // `design-doctor` and not an unrelated legacy skill name.
+        if (name === 'design-doctor' || name === 'teach-design-doctor') continue;
+        if (!name.endsWith('-design-doctor')) continue;
         if (!isRealSkillDir(skillsDir, name)) continue;
 
-        const dest = join(skillsDir, 'impeccable');
+        const dest = join(skillsDir, 'design-doctor');
         try {
           rmSync(dest, { recursive: true, force: true });
           renameSync(join(skillsDir, name), dest);
@@ -923,7 +956,7 @@ function installRootForScope(scope, projectRoot) {
 
 function printInstallIntro() {
   if (!isInteractivePrompt()) return;
-  console.log(`${ui.accent(ui.bold('impeccable'))} ${ui.dim('install')}`);
+  console.log(`${ui.accent(ui.bold('design-doctor'))} ${ui.dim('install')}`);
   console.log('');
 }
 
@@ -1167,16 +1200,16 @@ function hookArtifactsForProvider(bundleDir, root, provider) {
 
 function hookScriptPathForProvider(skillRoot, provider) {
   // `.github` is intentionally absent: its hook manifest (`.github/hooks/
-  // impeccable.json`) is a committed, team-shared file that the Copilot cloud
+  // design-doctor.json`) is a committed, team-shared file that the Copilot cloud
   // agent and every teammate read, so the command must stay portable
   // (`$(git rev-parse --show-toplevel)/.github/skills/...`). Rewriting it to a
   // machine-local absolute skillRoot path would break those. GitHub skills are
   // project-scoped (not a home-provider), so the project-relative path resolves.
   if (provider === '.cursor') {
-    return join(skillRoot, provider, 'skills', 'impeccable', 'scripts', 'hook-before-edit.mjs');
+    return join(skillRoot, provider, 'skills', 'design-doctor', 'scripts', 'hook-before-edit.mjs');
   }
   if (provider === '.claude' || provider === '.agents') {
-    return join(skillRoot, provider, 'skills', 'impeccable', 'scripts', 'hook.mjs');
+    return join(skillRoot, provider, 'skills', 'design-doctor', 'scripts', 'hook.mjs');
   }
   return null;
 }
@@ -1186,7 +1219,7 @@ function rewriteHookCommandsForSkillRoot(value, provider, skillRoot) {
   if (!hookScript) return value;
 
   if (typeof value === 'string') {
-    if (valueHasImpeccableHookMarker(value)) return `node ${JSON.stringify(hookScript)}`;
+    if (valueHasDesignDoctorHookMarker(value)) return `node ${JSON.stringify(hookScript)}`;
     return value;
   }
   if (Array.isArray(value)) {
@@ -1212,11 +1245,11 @@ function expectedHookDests(root, providers) {
   );
 }
 
-// Whether a hook manifest file actually wires up the Impeccable hook. We parse
-// the JSON and scan only the `hooks` subtree (via valueHasImpeccableHookMarker),
+// Whether a hook manifest file actually wires up the Design Doctor hook. We parse
+// the JSON and scan only the `hooks` subtree (via valueHasDesignDoctorHookMarker),
 // not the raw file text: an unrelated string elsewhere — e.g. a permissions
 // allow entry that happens to mention the hook path — must not read as a hook.
-function fileHasImpeccableHookMarker(file) {
+function fileHasDesignDoctorHookMarker(file) {
   if (!existsSync(file)) return false;
   let parsed;
   try {
@@ -1226,12 +1259,12 @@ function fileHasImpeccableHookMarker(file) {
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
   if (!parsed.hooks || typeof parsed.hooks !== 'object') return false;
-  return valueHasImpeccableHookMarker(parsed.hooks);
+  return valueHasDesignDoctorHookMarker(parsed.hooks);
 }
 
 // Whether our hook is already wired up for a provider, used to decide if the
 // already-installed fast path should top up a missing hook. We look for the
-// Impeccable marker — not mere file existence — because the target files
+// Design Doctor marker — not mere file existence — because the target files
 // (settings.local.json, hooks.json) commonly hold unrelated local settings; an
 // existence check would falsely report "installed" and skip repairing a missing
 // hook that `update` would otherwise add. For Claude we also honor our hook
@@ -1241,48 +1274,48 @@ function hookInstalledForProvider(root, provider) {
   if (artifacts.length === 0) return true;
   return artifacts.every(({ destProvider, rel, destRel }) => {
     const writeRel = destRel || rel;
-    if (fileHasImpeccableHookMarker(join(root, destProvider, writeRel))) return true;
-    if (writeRel !== rel && fileHasImpeccableHookMarker(join(root, destProvider, rel))) return true;
+    if (fileHasDesignDoctorHookMarker(join(root, destProvider, writeRel))) return true;
+    if (writeRel !== rel && fileHasDesignDoctorHookMarker(join(root, destProvider, rel))) return true;
     return false;
   });
 }
 
-function valueHasImpeccableHookMarker(value) {
+function valueHasDesignDoctorHookMarker(value) {
   if (typeof value === 'string') {
-    return IMPECCABLE_HOOK_COMMAND_MARKERS.some(marker => value.includes(marker));
+    return DESIGN_DOCTOR_HOOK_COMMAND_MARKERS.some(marker => value.includes(marker));
   }
-  if (Array.isArray(value)) return value.some(valueHasImpeccableHookMarker);
+  if (Array.isArray(value)) return value.some(valueHasDesignDoctorHookMarker);
   if (value && typeof value === 'object') {
-    return Object.values(value).some(valueHasImpeccableHookMarker);
+    return Object.values(value).some(valueHasDesignDoctorHookMarker);
   }
   return false;
 }
 
-function stripImpeccableHookEntry(entry) {
+function stripDesignDoctorHookEntry(entry) {
   if (!entry || typeof entry !== 'object') return entry;
   // `command`/`args`: Claude/Codex/Cursor. `bash`/`powershell`: GitHub Copilot's
   // flat entry shape, where the marker lives under the shell-command keys.
-  if (valueHasImpeccableHookMarker(entry.command) || valueHasImpeccableHookMarker(entry.args)
-    || valueHasImpeccableHookMarker(entry.bash) || valueHasImpeccableHookMarker(entry.powershell)) {
+  if (valueHasDesignDoctorHookMarker(entry.command) || valueHasDesignDoctorHookMarker(entry.args)
+    || valueHasDesignDoctorHookMarker(entry.bash) || valueHasDesignDoctorHookMarker(entry.powershell)) {
     return null;
   }
   if (!Array.isArray(entry.hooks)) return entry;
 
   const strippedHooks = entry.hooks
-    .map(stripImpeccableHookEntry)
+    .map(stripDesignDoctorHookEntry)
     .filter(Boolean);
 
-  if (strippedHooks.length === 0 && entry.hooks.some(valueHasImpeccableHookMarker)) {
+  if (strippedHooks.length === 0 && entry.hooks.some(valueHasDesignDoctorHookMarker)) {
     return null;
   }
 
   return { ...entry, hooks: strippedHooks };
 }
 
-function stripImpeccableHookEntries(entries) {
+function stripDesignDoctorHookEntries(entries) {
   if (!Array.isArray(entries)) return [];
   return entries
-    .map(stripImpeccableHookEntry)
+    .map(stripDesignDoctorHookEntry)
     .filter(Boolean);
 }
 
@@ -1290,8 +1323,8 @@ function stripImpeccableHookEntries(entries) {
 // when the hook is honored in the shared settings.json so a stale machine-local
 // copy doesn't make the detector run twice. Drops the file if nothing but our
 // hook scaffolding remains. Returns true if it changed anything.
-function pruneImpeccableHookFromManifest(manifestPath) {
-  if (!fileHasImpeccableHookMarker(manifestPath)) return false;
+function pruneDesignDoctorHookFromManifest(manifestPath) {
+  if (!fileHasDesignDoctorHookMarker(manifestPath)) return false;
   let parsed;
   try {
     parsed = JSON.parse(readFileSync(manifestPath, 'utf-8'));
@@ -1304,7 +1337,7 @@ function pruneImpeccableHookFromManifest(manifestPath) {
     : {};
   const cleanedHooks = {};
   for (const [event, entries] of Object.entries(existingHooks)) {
-    const kept = stripImpeccableHookEntries(entries);
+    const kept = stripDesignDoctorHookEntries(entries);
     if (kept.length > 0) cleanedHooks[event] = kept;
   }
 
@@ -1342,7 +1375,7 @@ function mergeHookManifests(existing, fresh) {
 
   const hookEvents = new Set([...Object.keys(existingHooks), ...Object.keys(freshHooks)]);
   for (const event of hookEvents) {
-    const preserved = stripImpeccableHookEntries(existingHooks[event]);
+    const preserved = stripDesignDoctorHookEntries(existingHooks[event]);
     const added = Array.isArray(freshHooks[event]) ? freshHooks[event] : [];
     const mergedEntries = [...preserved, ...added];
     if (mergedEntries.length > 0) merged.hooks[event] = mergedEntries;
@@ -1371,8 +1404,8 @@ function copyProviderHooks(bundleDir, root, providers, { force = false, skillRoo
       // place and skip the local write — but first strip any stale copy from the
       // local override, or Claude Code would load both and run the detector
       // twice per edit.
-      if (sharedDest && fileHasImpeccableHookMarker(sharedDest)) {
-        pruneImpeccableHookFromManifest(dest);
+      if (sharedDest && fileHasDesignDoctorHookMarker(sharedDest)) {
+        pruneDesignDoctorHookFromManifest(dest);
         continue;
       }
 
@@ -1405,16 +1438,16 @@ function copyProviderHooks(bundleDir, root, providers, { force = false, skillRoo
 
 const HOOK_EXPLAINER = [
   '',
-  'Impeccable can install a design hook for this project. In Claude/Codex it',
+  'Design Doctor can install a design hook for this project. In Claude/Codex it',
   'checks UI files after edits; in Cursor it checks proposed writes before they',
   'land and can block writes with detector findings. It feeds results back to',
   'your agent so design slop gets caught as you build. Change it later with',
-  '/impeccable hooks on|off.',
+  '/design-doctor hooks on|off.',
   '',
 ].join('\n');
 
 // Decide whether to install the design hook. Prompts once (default yes) the
-// first time, records the answer in .impeccable/config.local.json, and never
+// first time, records the answer in .design-doctor/config.local.json, and never
 // re-asks: a recorded decision or an already-installed hook short-circuits, and
 // non-interactive runs keep the historical install-by-default behavior.
 async function decideHookInstall(root, targets, { yes } = {}) {
@@ -1438,7 +1471,7 @@ async function decideHookInstall(root, targets, { yes } = {}) {
 }
 
 function resolveLinkSource(sourceValue, root) {
-  const sourcePath = sourceValue || '.impeccable';
+  const sourcePath = sourceValue || '.design-doctor';
   const checkoutRoot = isAbsolute(sourcePath) ? sourcePath : resolve(root, sourcePath);
   const universalRoot = join(checkoutRoot, 'dist', 'universal');
   if (existsSync(universalRoot)) {
@@ -1545,7 +1578,7 @@ async function link(flags) {
   if (!yes) {
     console.log(`Source checkout: ${source.checkoutRoot}`);
     console.log(`Target harness folder(s): ${targets.join(', ')}`);
-    const ans = await ask(`Link impeccable skills into ${targets.length} folder(s)? (Y/n) `);
+    const ans = await ask(`Link design-doctor skills into ${targets.length} folder(s)? (Y/n) `);
     if (ans === 'n' || ans === 'no') {
       console.log('Aborted. Re-run with --providers=<names> to choose explicitly (e.g. --providers=claude,cursor).');
       process.exit(0);
@@ -1567,7 +1600,7 @@ async function link(flags) {
   if (result.linked > 0) parts.push(`${result.linked} linked`);
   if (result.already > 0) parts.push(`${result.already} already linked`);
   if (result.skipped > 0) parts.push(`${result.skipped} skipped`);
-  console.log(`Linked impeccable into: ${targets.join(', ')} (${parts.join(', ')}).`);
+  console.log(`Linked design-doctor into: ${targets.join(', ')} (${parts.join(', ')}).`);
   console.log('Update with `git submodule update --remote` from your project root, then rerun this command if new skills are added.\n');
 }
 
@@ -1591,7 +1624,7 @@ async function install(flags) {
   const existing = isAlreadyInstalled(installRoot, scope);
 
   if (existing && !force) {
-    console.log(`Impeccable skills are already installed (found in ${existing}/).`);
+    console.log(`Design Doctor skills are already installed (found in ${existing}/).`);
     const installedTargets = findInstalledProviders(installRoot, scope);
     const selectedInstalledTargets = targets.filter(provider => installedTargets.includes(provider));
     const linkedTargets = findLinkedProviders(installRoot, selectedInstalledTargets, scope);
@@ -1602,7 +1635,7 @@ async function install(flags) {
     try {
       if (linkedTargets.length > 0) {
         console.log(`Linked skills found in: ${linkedTargets.join(', ')}`);
-        console.log('Update the source checkout with `git submodule update --remote`, then rerun `npx impeccable link --source=.impeccable` if new skills are added.');
+        console.log('Update the source checkout with `git submodule update --remote`, then rerun `npx design-doctor link --source=.design-doctor` if new skills are added.');
         if (copyTargets.length > 0) console.log(`Continuing with copied installs in: ${copyTargets.join(', ')}\n`);
       }
 
@@ -1622,7 +1655,7 @@ async function install(flags) {
       }
 
       if (!updateCheckSkipped && copyTargets.length > 0 && !isUpToDate(installRoot, copyTargets, bundleDir, scope)) {
-        migrateUnprefixImpeccable(installRoot, scope);
+        migrateUnprefixDesignDoctor(installRoot, scope);
         updated = refreshProviderSkills(bundleDir, installRoot, copyTargets, scope);
         const v = getSkillsVersion(installRoot, scope);
         console.log(`Updated ${updated} skill(s)${v ? ` to v${v}` : ''}.`);
@@ -1665,7 +1698,7 @@ async function install(flags) {
 
   const wantHooks = installHooks && await decideHookInstall(hookRoot, targets, { yes });
 
-  console.log('\nDownloading impeccable skills...');
+  console.log('\nDownloading design-doctor skills...');
   let bundleDir;
   try {
     bundleDir = await downloadAndExtractBundle();
@@ -1675,8 +1708,8 @@ async function install(flags) {
   }
 
   // Retire any old `i-`-prefixed install so the fresh copy lands on the
-  // canonical `impeccable` dir instead of orphaning the prefixed one.
-  migrateUnprefixImpeccable(installRoot, scope);
+  // canonical `design-doctor` dir instead of orphaning the prefixed one.
+  migrateUnprefixDesignDoctor(installRoot, scope);
 
   let written = 0;
   let hookTargets = [];
@@ -1694,10 +1727,10 @@ async function install(flags) {
     console.error(`Nothing was installed: the bundle had no variants for ${targets.join(', ')}.`);
     process.exit(1);
   }
-  console.log(`Installed impeccable into: ${targets.join(', ')} (${scope === 'user' ? 'global' : 'project'})`);
+  console.log(`Installed design-doctor into: ${targets.join(', ')} (${scope === 'user' ? 'global' : 'project'})`);
   if (hookTargets.length > 0) console.log(`Installed hooks into: ${hookTargets.join(', ')}`);
 
-  console.log('\nDone! Run /impeccable init in your AI harness to set up design context.\n');
+  console.log('\nDone! Run /design-doctor init in your AI harness to set up design context.\n');
 }
 
 // ─── skills update ────────────────────────────────────────────────────────────
@@ -1730,7 +1763,7 @@ function findInstalledProviders(root, scope) {
 function findLinkedProviders(root, providers, scope) {
   return providers.filter(provider => {
     for (const skillsDir of providerSkillsDirCandidates(root, provider, scope)) {
-      const skillDir = join(skillsDir, 'impeccable');
+      const skillDir = join(skillsDir, 'design-doctor');
       try {
         if (lstatSync(skillDir).isSymbolicLink()) return true;
       } catch {}
@@ -1787,7 +1820,7 @@ async function update(flags = []) {
   const force = flags.includes('--force');
   const installHooks = !flags.includes('--no-hooks');
 
-  // Download the latest skills directly from impeccable.style.
+  // Download the latest skills directly from the GitHub release.
   // We skip `npx skills update` because it has a known upstream bug
   // (vercel-labs/skills#775) where it can't find the lock file.
   const root = findProjectRoot();
@@ -1796,14 +1829,14 @@ async function update(flags = []) {
   const copyProviders = providers.filter(provider => !linkedProviders.includes(provider));
 
   if (providers.length === 0) {
-    console.log('No impeccable skill folders found in this project.');
-    console.log('Run `npx impeccable install` to install first.');
+    console.log('No design-doctor skill folders found in this project.');
+    console.log('Run `npx design-doctor install` to install first.');
     process.exit(1);
   }
 
   if (linkedProviders.length > 0) {
     console.log(`Linked skills found in: ${linkedProviders.join(', ')}`);
-    console.log('Update the source checkout with `git submodule update --remote`, then rerun `npx impeccable link --source=.impeccable` if new skills are added.');
+    console.log('Update the source checkout with `git submodule update --remote`, then rerun `npx design-doctor link --source=.design-doctor` if new skills are added.');
     if (copyProviders.length === 0) process.exit(0);
     console.log(`Continuing with copied installs in: ${copyProviders.join(', ')}\n`);
   }
@@ -1850,9 +1883,9 @@ async function update(flags = []) {
   try {
 
     // Retire any old `i-`-prefixed install up front so the refresh lands on the
-    // canonical `impeccable` dir rather than orphaning the prefixed copy.
-    const migrated = migrateUnprefixImpeccable(root);
-    if (migrated > 0) console.log('Migrated a prefixed install back to /impeccable (the i- prefix is no longer used).');
+    // canonical `design-doctor` dir rather than orphaning the prefixed copy.
+    const migrated = migrateUnprefixDesignDoctor(root);
+    if (migrated > 0) console.log('Migrated a prefixed install back to /design-doctor (the i- prefix is no longer used).');
 
     const updated = refreshProviderSkills(tmpDir, root, copyProviders);
     const wantHooks = installHooks && await decideHookInstall(root, providers, { yes });
@@ -1897,7 +1930,7 @@ export {
   formatInstallDetectionLines,
   linkProviderSkills,
   mergeHookManifests,
-  migrateUnprefixImpeccable,
+  migrateUnprefixDesignDoctor,
   resolveInstallTargets,
   resolveLinkSource,
 };
@@ -1919,7 +1952,7 @@ export async function run(args) {
     await check();
   } else {
     console.error(`Unknown skills command: ${sub}`);
-    console.error(`Run 'impeccable --help' for available commands.`);
+    console.error(`Run 'design-doctor --help' for available commands.`);
     process.exit(1);
   }
 }

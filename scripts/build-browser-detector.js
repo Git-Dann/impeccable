@@ -41,7 +41,7 @@ function browserSafeModule(relPath) {
 const code = MODULES.map(browserSafeModule).join('\n');
 
 const output = `/**
- * Anti-Pattern Browser Detector for Impeccable
+ * Anti-Pattern Browser Detector for Design Doctor
  * Copyright (c) 2026 Paul Bakaus
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -49,7 +49,7 @@ const output = `/**
  * Rebuild: node scripts/build-browser-detector.js
  *
  * Usage: <script src="detect-antipatterns-browser.js"></script>
- * Re-scan: window.impeccableScan()
+ * Re-scan: window.designDoctorScan()
  */
 (function () {
 if (typeof window === 'undefined') return;

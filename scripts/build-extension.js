@@ -53,7 +53,7 @@ const code = BROWSER_MODULES.map(browserSafeModule).join('\n');
 // --- 1. Build detector ---
 
 const output = `/**
- * Anti-Pattern Browser Detector for Impeccable (Extension Variant)
+ * Anti-Pattern Browser Detector for Design Doctor (Extension Variant)
  * Copyright (c) 2026 Paul Bakaus
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -129,7 +129,7 @@ const firefoxManifest = {
   // Required by AMO for signing/distribution. Ignored by Chrome.
   browser_specific_settings: {
     gecko: {
-      id: 'impeccable@bakaus.com',
+      id: 'design-doctor@bakaus.com',
       // `data_collection_permissions` (below) is required by AMO for new
       // submissions and is only honored on Firefox 140+. We set the floor to
       // 140 so the declared min version actually supports every key we ship;

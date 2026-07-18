@@ -18,42 +18,42 @@ describe('OpenAI plugin staging', () => {
   let dist;
 
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-openai-plugin-'));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-openai-plugin-'));
     dist = path.join(root, 'dist');
 
     write(root, '.claude-plugin/plugin.json', JSON.stringify({
-      name: 'impeccable',
+      name: 'design-doctor',
       version: '3.9.1',
       author: {
         name: 'Paul Bakaus',
         email: 'paul@example.com',
       },
       homepage: 'https://impeccable.style',
-      repository: 'https://github.com/pbakaus/impeccable',
+      repository: 'https://github.com/pbakaus/design-doctor',
     }));
-    write(root, 'site/public/apple-touch-icon.png', 'icon');
+    write(root, 'extension/icons/icon-128.png', 'icon');
 
     write(
       root,
-      'dist/codex/.codex/skills/impeccable/SKILL.md',
-      '---\nname: impeccable\n---\n\nUse $impeccable. Run .codex/skills/impeccable/scripts/context.mjs.\n',
+      'dist/codex/.codex/skills/design-doctor/SKILL.md',
+      '---\nname: design-doctor\n---\n\nUse $design-doctor. Run .codex/skills/design-doctor/scripts/context.mjs.\n',
     );
     write(
       root,
-      'dist/codex/.codex/skills/impeccable/agents/openai.yaml',
-      'interface:\n  display_name: Impeccable\n',
+      'dist/codex/.codex/skills/design-doctor/agents/openai.yaml',
+      'interface:\n  display_name: Design Doctor\n',
     );
     write(
       root,
-      'dist/codex/.codex/skills/impeccable/agents/impeccable_asset_producer.toml',
-      'name = "impeccable_asset_producer"\n',
+      'dist/codex/.codex/skills/design-doctor/agents/design_doctor_asset_producer.toml',
+      'name = "design_doctor_asset_producer"\n',
     );
 
     // A Claude payload exists too. The OpenAI stage must never read it.
     write(
       root,
-      'dist/claude-code/.claude/skills/impeccable/SKILL.md',
-      '---\nname: impeccable\n---\n\nUse /impeccable. Run .claude/skills/impeccable/scripts/context.mjs.\n',
+      'dist/claude-code/.claude/skills/design-doctor/SKILL.md',
+      '---\nname: design-doctor\n---\n\nUse /design-doctor. Run .claude/skills/design-doctor/scripts/context.mjs.\n',
     );
   });
 
@@ -63,25 +63,25 @@ describe('OpenAI plugin staging', () => {
 
   it('packages the Codex skill, agents, manifest, icon, and compatible hook', () => {
     const pluginRoot = stageOpenAIPlugin(root, dist);
-    const skill = fs.readFileSync(path.join(pluginRoot, 'skills/impeccable/SKILL.md'), 'utf8');
+    const skill = fs.readFileSync(path.join(pluginRoot, 'skills/design-doctor/SKILL.md'), 'utf8');
     const manifest = JSON.parse(fs.readFileSync(path.join(pluginRoot, '.codex-plugin/plugin.json'), 'utf8'));
     const hooks = JSON.parse(fs.readFileSync(path.join(pluginRoot, 'hooks/hooks.json'), 'utf8'));
 
-    assert.match(skill, /\$impeccable/);
-    assert.match(skill, /\.codex\/skills\/impeccable/);
-    assert.doesNotMatch(skill, /(?:^|[\s`(])\/impeccable\b/m);
-    assert.doesNotMatch(skill, /\.claude\/skills\/impeccable/);
+    assert.match(skill, /\$design-doctor/);
+    assert.match(skill, /\.codex\/skills\/design-doctor/);
+    assert.doesNotMatch(skill, /(?:^|[\s`(])\/design-doctor\b/m);
+    assert.doesNotMatch(skill, /\.claude\/skills\/design-doctor/);
 
-    assert.ok(fs.existsSync(path.join(pluginRoot, 'skills/impeccable/agents/openai.yaml')));
+    assert.ok(fs.existsSync(path.join(pluginRoot, 'skills/design-doctor/agents/openai.yaml')));
     assert.ok(fs.existsSync(path.join(
       pluginRoot,
-      'skills/impeccable/agents/impeccable_asset_producer.toml',
+      'skills/design-doctor/agents/design_doctor_asset_producer.toml',
     )));
     assert.ok(fs.existsSync(path.join(pluginRoot, 'assets/icon.png')));
 
     assert.equal(manifest.skills, './skills/');
     assert.deepEqual(manifest.author, {
-      name: 'Renaissance Geek Inc',
+      name: 'Gitwork',
       url: 'https://impeccable.style',
     });
     assert.equal('email' in manifest.author, false);

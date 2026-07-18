@@ -17,7 +17,7 @@ describe('live target-aware monorepo context', () => {
   let tmp;
 
   beforeEach(() => {
-    tmp = realpathSync(mkdtempSync(join(tmpdir(), 'impeccable-live-target-')));
+    tmp = realpathSync(mkdtempSync(join(tmpdir(), 'design-doctor-live-target-')));
     setupMonorepo(tmp);
   });
 
@@ -35,7 +35,7 @@ describe('live target-aware monorepo context', () => {
 
     assert.equal(payload.ok, false);
     assert.equal(payload.error, 'config_missing');
-    assert.equal(payload.path, join(tmp, 'apps', 'dashboard', '.impeccable', 'live', 'config.json'));
+    assert.equal(payload.path, join(tmp, 'apps', 'dashboard', '.design-doctor', 'live', 'config.json'));
     assert.equal(payload.projectRoot, join(tmp, 'apps', 'dashboard'));
     assert.equal(payload.repoRoot, tmp);
   });
@@ -54,10 +54,10 @@ describe('live target-aware monorepo context', () => {
       assert.match(payload.product, /ROOT PRODUCT LIVE INHERIT/);
       assert.match(payload.design, /ROOT DESIGN LIVE INHERIT/);
       assert.deepEqual(payload.pageFiles, ['public/index.html']);
-      assert.equal(payload.liveConfigPath, join(tmp, 'apps', 'dashboard', '.impeccable', 'live', 'config.json'));
+      assert.equal(payload.liveConfigPath, join(tmp, 'apps', 'dashboard', '.design-doctor', 'live', 'config.json'));
 
-      assert.equal(existsSync(join(tmp, 'apps', 'dashboard', '.impeccable', 'live', 'server.json')), true);
-      assert.equal(existsSync(join(tmp, '.impeccable', 'live', 'server.json')), false);
+      assert.equal(existsSync(join(tmp, 'apps', 'dashboard', '.design-doctor', 'live', 'server.json')), true);
+      assert.equal(existsSync(join(tmp, '.design-doctor', 'live', 'server.json')), false);
 
       const raw = await fetchDesignRaw(payload);
       assert.match(raw, /ROOT DESIGN LIVE INHERIT/);
@@ -102,9 +102,9 @@ describe('live target-aware monorepo context', () => {
       assert.equal(payload.designPath, join('..', '..', 'DESIGN.md'));
       assert.match(payload.product, /ROOT PRODUCT LIVE INHERIT/);
       assert.match(payload.design, /ROOT DESIGN LIVE INHERIT/);
-      assert.equal(payload.liveConfigPath, join(childRoot, '.impeccable', 'live', 'config.json'));
-      assert.equal(existsSync(join(childRoot, '.impeccable', 'live', 'server.json')), true);
-      assert.equal(existsSync(join(tmp, '.impeccable', 'live', 'server.json')), false);
+      assert.equal(payload.liveConfigPath, join(childRoot, '.design-doctor', 'live', 'config.json'));
+      assert.equal(existsSync(join(childRoot, '.design-doctor', 'live', 'server.json')), true);
+      assert.equal(existsSync(join(tmp, '.design-doctor', 'live', 'server.json')), false);
     } finally {
       stopLive(tmp);
     }
@@ -237,8 +237,8 @@ describe('live target-aware monorepo context', () => {
         designPath: 'DESIGN.md',
       },
     );
-    assert.equal(existsSync(join(tmp, '.impeccable', 'live', 'server.json')), false);
-    assert.equal(existsSync(join(tmp, 'apps', 'dashboard', '.impeccable', 'live', 'server.json')), false);
+    assert.equal(existsSync(join(tmp, '.design-doctor', 'live', 'server.json')), false);
+    assert.equal(existsSync(join(tmp, 'apps', 'dashboard', '.design-doctor', 'live', 'server.json')), false);
     assert.doesNotMatch(readFileSync(join(tmp, 'public', 'root.html'), 'utf-8'), /live\.js/);
     assert.doesNotMatch(readFileSync(join(tmp, 'apps', 'dashboard', 'public', 'index.html'), 'utf-8'), /live\.js/);
   });
@@ -249,7 +249,7 @@ describe('live single-repo context setup guard', () => {
   let tmp;
 
   beforeEach(() => {
-    tmp = realpathSync(mkdtempSync(join(tmpdir(), 'impeccable-live-single-')));
+    tmp = realpathSync(mkdtempSync(join(tmpdir(), 'design-doctor-live-single-')));
   });
 
   afterEach(() => {
@@ -272,7 +272,7 @@ describe('live single-repo context setup guard', () => {
       assert.equal(payload.designPath, 'DESIGN.md');
       assert.match(payload.product, /SINGLE PRODUCT/);
       assert.match(payload.design, /SINGLE DESIGN/);
-      assert.equal(existsSync(join(tmp, '.impeccable', 'live', 'server.json')), true);
+      assert.equal(existsSync(join(tmp, '.design-doctor', 'live', 'server.json')), true);
     } finally {
       runNode(LIVE_SERVER_SCRIPT, ['stop', '--keep-inject'], tmp);
     }
@@ -333,7 +333,7 @@ function setupSingleRepo(root, { product = true, design = true } = {}) {
   if (product) write(root, 'PRODUCT.md', '# SINGLE PRODUCT\n');
   if (design) write(root, 'DESIGN.md', '# SINGLE DESIGN\n');
   write(root, 'public/index.html', '<!doctype html><html><body><main>Single</main></body></html>\n');
-  write(root, '.impeccable/live/config.json', JSON.stringify({
+  write(root, '.design-doctor/live/config.json', JSON.stringify({
     files: ['public/index.html'],
     insertBefore: '</body>',
     commentSyntax: 'html',
@@ -341,7 +341,7 @@ function setupSingleRepo(root, { product = true, design = true } = {}) {
 }
 
 function writeRootLiveConfig(root) {
-  write(root, '.impeccable/live/config.json', JSON.stringify({
+  write(root, '.design-doctor/live/config.json', JSON.stringify({
     files: ['public/root.html'],
     insertBefore: '</body>',
     commentSyntax: 'html',
@@ -350,7 +350,7 @@ function writeRootLiveConfig(root) {
 }
 
 function writeChildLiveConfig(root) {
-  write(root, 'apps/dashboard/.impeccable/live/config.json', JSON.stringify({
+  write(root, 'apps/dashboard/.design-doctor/live/config.json', JSON.stringify({
     files: ['public/index.html'],
     insertBefore: '</body>',
     commentSyntax: 'html',
@@ -385,13 +385,13 @@ function runSingleRepoMissingContext(root) {
 }
 
 function assertNoLiveBootSideEffects(root) {
-  assert.equal(existsSync(join(root, 'apps', 'dashboard', '.impeccable', 'live', 'server.json')), false);
-  assert.equal(existsSync(join(root, '.impeccable', 'live', 'server.json')), false);
+  assert.equal(existsSync(join(root, 'apps', 'dashboard', '.design-doctor', 'live', 'server.json')), false);
+  assert.equal(existsSync(join(root, '.design-doctor', 'live', 'server.json')), false);
   assert.doesNotMatch(readFileSync(join(root, 'apps', 'dashboard', 'public', 'index.html'), 'utf-8'), /live\.js/);
 }
 
 function assertNoSingleRepoLiveBootSideEffects(root) {
-  assert.equal(existsSync(join(root, '.impeccable', 'live', 'server.json')), false);
+  assert.equal(existsSync(join(root, '.design-doctor', 'live', 'server.json')), false);
   assert.doesNotMatch(readFileSync(join(root, 'public', 'index.html'), 'utf-8'), /live\.js/);
 }
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: Design Doctor
+  short_description: Use when the user wants to design, redesign, shape, critique, audit, polish, clarify,...
+  default_prompt: Use Design Doctor to redesign, critique, audit, or polish this frontend.

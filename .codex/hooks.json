@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \".agents/skills/impeccable/scripts/hook.mjs\"",
+            "command": "node \".agents/skills/design-doctor/scripts/hook.mjs\"",
             "timeout": 5,
             "statusMessage": "Checking UI changes"
           }

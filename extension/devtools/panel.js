@@ -1,5 +1,5 @@
 /**
- * Impeccable DevTools Extension - Panel
+ * Design Doctor DevTools Extension - Panel
  *
  * Displays findings, provides controls for scanning and overlay toggling,
  * and allows clicking findings to inspect elements.
@@ -18,7 +18,7 @@ const tabId = chrome.devtools.inspectedWindow.tabId;
 let port = null;
 function getPort() {
   if (port) return port;
-  port = chrome.runtime.connect({ name: `impeccable-panel-${tabId}` });
+  port = chrome.runtime.connect({ name: `design-doctor-panel-${tabId}` });
   port.onMessage.addListener(handlePortMessage);
   port.onDisconnect.addListener(() => { port = null; });
   return port;
@@ -221,7 +221,7 @@ function showScanning() {
     </div>`;
 }
 
-// Maps each anti-pattern to the most relevant Impeccable skill(s) for fixing it.
+// Maps each anti-pattern to the most relevant Design Doctor skill(s) for fixing it.
 // These are suggestions; the user decides whether and how to apply them.
 const FIX_SKILLS = {
   // AI slop
@@ -285,9 +285,9 @@ function getInspectedUrl() {
 }
 
 async function formatFindingsForCopy(findings) {
-  if (!findings.length) return 'Impeccable found no anti-patterns on this page.';
+  if (!findings.length) return 'Design Doctor found no anti-patterns on this page.';
   const url = await getInspectedUrl();
-  const lines = ['# Impeccable findings'];
+  const lines = ['# Design Doctor findings'];
   if (url) lines.push(`URL: ${url}`);
   lines.push('');
 
@@ -320,26 +320,26 @@ async function formatFindingsForCopy(findings) {
   // Roll up suggested skills across all findings (most-relevant first)
   const skills = uniqueSkillsForFindings(findings);
   if (skills.length) {
-    lines.push(`Suggested Impeccable skills to fix: ${skills.join(', ')}`);
+    lines.push(`Suggested Design Doctor skills to fix: ${skills.join(', ')}`);
     lines.push('');
   }
 
   lines.push('---');
-  lines.push('Detected by [Impeccable](https://impeccable.style). Skills are suggestions, not required.');
+  lines.push('Detected by Design Doctor (Gitwork). Skills are suggestions, not required.');
   return lines.join('\n');
 }
 
 async function formatSingleFindingForCopy(item, finding) {
   const url = await getInspectedUrl();
   const where = item.isPageLevel ? '_(page-level)_' : `\`${item.selector}\``;
-  const lines = [`# Impeccable: ${finding.name}`];
+  const lines = [`# Design Doctor: ${finding.name}`];
   if (url) lines.push(`URL: ${url}`);
   lines.push(`Element: ${where}`);
   lines.push(`Detail: ${finding.detail}`);
   lines.push('');
   lines.push(finding.description);
   lines.push('');
-  lines.push(`Suggested Impeccable skill(s) to fix: ${fixSkillFor(finding.type)}`);
+  lines.push(`Suggested Design Doctor skill(s) to fix: ${fixSkillFor(finding.type)}`);
   return lines.join('\n');
 }
 

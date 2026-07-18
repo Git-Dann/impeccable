@@ -98,7 +98,7 @@ describe('ci-test-plan', () => {
 });
 
 function runPlan(env) {
-  const tmp = mkdtempSync(join(tmpdir(), 'impeccable-ci-plan-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'design-doctor-ci-plan-'));
   const outputPath = join(tmp, 'github-output');
   try {
     const result = spawnSync(process.execPath, [SCRIPT], {

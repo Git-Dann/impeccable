@@ -127,7 +127,7 @@ async function generateOgImage() {
           <path d="M16.5 2.5 L19 2.5 Q21.5 2.5 21.5 5 L21.5 19 Q21.5 21.5 19 21.5 L8.5 21.5 Z"/>
         </svg>
       </span>
-      <span class="wordmark">Impeccable</span>
+      <span class="wordmark">Design Doctor</span>
     </div>
     <div class="headline-wrap">
       <h1 class="headline">Design fluency for<br>every AI harness.</h1>
@@ -135,7 +135,7 @@ async function generateOgImage() {
     </div>
     <div class="meta">
       <div class="meta-left"><span class="lead">${commands} commands</span><span class="dot">&middot;</span>Skill<span class="dot">&middot;</span>CLI<span class="dot">&middot;</span>Extension</div>
-      <div class="domain">impeccable.style</div>
+      <div class="domain">Built by Gitwork</div>
     </div>
   </div>
 </body>
@@ -149,7 +149,7 @@ async function generateOgImage() {
 
   // Write to a temp file and load via file:// so networkidle waits for the
   // art (a file:// page can reference file:// resources; data: cannot).
-  const tmpHtml = path.join(os.tmpdir(), `impeccable-og-${process.pid}.html`);
+  const tmpHtml = path.join(os.tmpdir(), `design-doctor-og-${process.pid}.html`);
   fs.writeFileSync(tmpHtml, html);
   try {
     await page.goto(pathToFileURL(tmpHtml).href, { waitUntil: 'networkidle' });

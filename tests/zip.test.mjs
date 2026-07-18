@@ -4,13 +4,13 @@
  *
  * Regression guard for the silent-broken-bundle outage: archiver v8's ESM
  * change made createProviderZip fail without throwing, so the build shipped a
- * 0-byte universal.zip and every `npx impeccable install` failed with
+ * 0-byte universal.zip and every `npx design-doctor install` failed with
  * "End-of-central-directory signature not found". Nothing covered the zip
  * writer, so the suite stayed green. These tests exercise the real writer and
  * round-trip through the same unpacker the CLI uses (extractZip, backed by
  * fflate). The many-file extraction test additionally guards the Node v24.16.0
  * / v26.1.0+ silent partial-extraction regression (nodejs/node#63487) that
- * made `npx impeccable install` exit 0 after writing only a fraction of the
+ * made `npx design-doctor install` exit 0 after writing only a fraction of the
  * bundle.
  */
 
@@ -24,9 +24,9 @@ import { createProviderZip, createAllZips } from '../scripts/lib/zip.js';
 import { extractZip } from '../cli/bin/commands/skills.mjs';
 
 function makeUniversalTree(distDir) {
-  const skillDir = join(distDir, 'universal', 'skills', 'impeccable');
+  const skillDir = join(distDir, 'universal', 'skills', 'design-doctor');
   mkdirSync(skillDir, { recursive: true });
-  writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: impeccable\n---\nhello\n');
+  writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: design-doctor\n---\nhello\n');
   mkdirSync(join(distDir, 'universal', '.claude'), { recursive: true });
   writeFileSync(join(distDir, 'universal', '.claude', 'settings.json'), '{}\n');
 }
@@ -41,11 +41,11 @@ function makeUniversalTree(distDir) {
 function makeLargeUniversalTree(distDir, { providers = ['.claude', '.cursor', '.agents', '.gemini', '.github', '.kiro'], scriptCount = 8, extraSkills = ['audit', 'polish'] } = {}) {
   let files = 0;
   for (const provider of providers) {
-    // The impeccable skill ships a scripts/ dir with many files, like the real
+    // The design-doctor skill ships a scripts/ dir with many files, like the real
     // bundle. This is where most entries live.
-    const scriptsDir = join(distDir, 'universal', provider, 'skills', 'impeccable', 'scripts');
+    const scriptsDir = join(distDir, 'universal', provider, 'skills', 'design-doctor', 'scripts');
     mkdirSync(scriptsDir, { recursive: true });
-    writeFileSync(join(distDir, 'universal', provider, 'skills', 'impeccable', 'SKILL.md'), `---\nname: impeccable\n---\nprovider ${provider}\n`);
+    writeFileSync(join(distDir, 'universal', provider, 'skills', 'design-doctor', 'SKILL.md'), `---\nname: design-doctor\n---\nprovider ${provider}\n`);
     files += 1;
     for (let i = 0; i < scriptCount; i++) {
       writeFileSync(join(scriptsDir, `script-${i}.mjs`), `// ${provider} script ${i}\nexport default ${i};\n`);
@@ -94,9 +94,9 @@ describe('release bundle zip writer', () => {
     // downloads this exact artifact and extractZip()s it.
     const out = mkdtempSync(join(tmpdir(), 'imp-unzip-'));
     await extractZip(zipPath, out);
-    const skillMd = join(out, 'skills', 'impeccable', 'SKILL.md');
-    assert.ok(existsSync(skillMd), 'unpacked bundle is missing skills/impeccable/SKILL.md');
-    assert.match(readFileSync(skillMd, 'utf8'), /name: impeccable/);
+    const skillMd = join(out, 'skills', 'design-doctor', 'SKILL.md');
+    assert.ok(existsSync(skillMd), 'unpacked bundle is missing skills/design-doctor/SKILL.md');
+    assert.match(readFileSync(skillMd, 'utf8'), /name: design-doctor/);
 
     rmSync(dist, { recursive: true, force: true });
     rmSync(out, { recursive: true, force: true });
@@ -106,7 +106,7 @@ describe('release bundle zip writer', () => {
     // Guards nodejs/node#63487: extract-zip's yauzl/fd-slicer read stack stalls
     // on Node v24.16.0 / v26.1.0+ (pause/resume on a destroyed stream became a
     // no-op), so extraction stops early, its promise never settles, and --
-    // because nothing else keeps the event loop alive -- `npx impeccable install`
+    // because nothing else keeps the event loop alive -- `npx design-doctor install`
     // exits 0 with no error, silently installing a fraction of the bundle. This
     // fixture carries 84 files (well past the ~31 entry stall point), so a
     // unpacker that stops early fails the count assertion here instead of

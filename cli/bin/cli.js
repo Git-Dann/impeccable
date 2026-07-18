@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Impeccable CLI
+ * Design Doctor CLI
  *
  * Usage:
- *   npx impeccable detect [file-or-dir-or-url...]
- *   npx impeccable ignores <list|add-file|add-value|remove-...>
- *   npx impeccable help|install|update
- *   npx impeccable --help
+ *   npx design-doctor detect [file-or-dir-or-url...]
+ *   npx design-doctor ignores <list|add-file|add-value|remove-...>
+ *   npx design-doctor help|install|update
+ *   npx design-doctor --help
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILL_COMMANDS = new Set(['help', 'install', 'link', 'update', 'check']);
 
-// Is this a detect target (the `npx impeccable src/` shorthand) or a mistyped
+// Is this a detect target (the `npx design-doctor src/` shorthand) or a mistyped
 // command? Flags, URLs, path-shaped args, and real files/dirs (e.g. an
 // extension-less `Dockerfile`) are targets; anything else is an unknown command.
 function looksLikeDetectTarget(arg) {
@@ -33,13 +33,13 @@ async function main() {
   const command = args[0];
 
   if (!command || command === '--help' || command === '-h') {
-    console.log(`Usage: impeccable <command> [options]
+    console.log(`Usage: design-doctor <command> [options]
 
 Commands:
   detect [file-or-dir-or-url...]   Scan for UI anti-patterns and design quality issues
   ignores                          Manage detector ignore rules, files, and values
   help                             List all available skills and commands
-  install                          Install impeccable skills into your project or global harness
+  install                          Install design-doctor skills into your project or global harness
   link                             Symlink skills from a local checkout or submodule
   update                           Update skills to the latest version
   check                            Check if skill updates are available
@@ -49,7 +49,7 @@ Options:
   --version    Show version number
 
 Compatibility:
-  impeccable skills <command>       Legacy namespace; still supported.`);
+  design-doctor skills <command>       Legacy namespace; still supported.`);
     process.exit(0);
   }
 
@@ -73,20 +73,20 @@ Compatibility:
     const { run } = await import('./commands/skills.mjs');
     await run(args);
   } else if (looksLikeDetectTarget(command)) {
-    // Default: treat as detect arguments (allow `npx impeccable src/` shorthand)
+    // Default: treat as detect arguments (allow `npx design-doctor src/` shorthand)
     process.argv = [process.argv[0], process.argv[1], ...args];
     const { detectCli } = await import('../engine/detect-antipatterns.mjs');
     await detectCli();
   } else {
     // An unknown bareword: a mistyped command (or an old cached version run
     // against newer docs). Fail loudly instead of silently statting it as a path.
-    console.error(`Unknown command: "${command}"\n\nTo see a list of supported commands, run:\n  impeccable --help`);
+    console.error(`Unknown command: "${command}"\n\nTo see a list of supported commands, run:\n  design-doctor --help`);
     process.exit(1);
   }
 }
 
 main().catch(error => {
-  if (error?.code === 'IMPECCABLE_PROMPT_ABORT') {
+  if (error?.code === 'DESIGN_DOCTOR_PROMPT_ABORT') {
     console.log('\nAborted.');
     process.exit(130);
   }

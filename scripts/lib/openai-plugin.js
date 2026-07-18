@@ -25,14 +25,14 @@ function writeJson(absPath, value) {
  */
 export function stageOpenAIPlugin(rootDir, distDir) {
   const rootManifestPath = path.join(rootDir, '.claude-plugin', 'plugin.json');
-  const codexSkillSrc = path.join(distDir, 'codex', '.codex', 'skills', 'impeccable');
-  const iconSrc = path.join(rootDir, 'site', 'public', 'apple-touch-icon.png');
+  const codexSkillSrc = path.join(distDir, 'codex', '.codex', 'skills', 'design-doctor');
+  const iconSrc = path.join(rootDir, 'extension', 'icons', 'icon-128.png');
 
   requirePath(rootManifestPath, 'root plugin manifest');
   requirePath(codexSkillSrc, 'Codex skill payload');
   requirePath(iconSrc, 'plugin icon');
 
-  const pluginRoot = path.join(distDir, 'openai', 'impeccable');
+  const pluginRoot = path.join(distDir, 'openai', 'design-doctor');
   fs.rmSync(pluginRoot, { recursive: true, force: true });
   fs.mkdirSync(pluginRoot, { recursive: true });
 
@@ -48,7 +48,7 @@ export function stageOpenAIPlugin(rootDir, distDir) {
   fs.mkdirSync(path.join(pluginRoot, 'skills'), { recursive: true });
   fs.cpSync(
     codexSkillSrc,
-    path.join(pluginRoot, 'skills', 'impeccable'),
+    path.join(pluginRoot, 'skills', 'design-doctor'),
     { recursive: true },
   );
 

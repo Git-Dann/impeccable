@@ -1,14 +1,14 @@
 # Chrome Web Store Listing
 
 ## Name
-Impeccable
+Design Doctor
 
 ## Short description (132 chars max)
 Detect AI slop and design anti-patterns in any web page. Open DevTools and see what needs fixing.
 
 ## Detailed description
 
-Impeccable detects 41 common UI anti-patterns directly in your browser. Open DevTools on any page and overlays instantly highlight issues, from AI-generated design tells to accessibility and quality problems.
+Design Doctor detects 41 common UI anti-patterns directly in your browser. Open DevTools on any page and overlays instantly highlight issues, from AI-generated design tells to accessibility and quality problems.
 
 WHAT IT DETECTS
 
@@ -40,7 +40,7 @@ HOW IT WORKS
 1. Install the extension
 2. Open DevTools on any page (Cmd+Opt+I / F12)
 3. Overlays appear automatically, highlighting issues
-4. Click the "Impeccable" panel tab for a structured list of all findings
+4. Click the "Design Doctor" panel tab for a structured list of all findings
 5. Click any finding to jump to the element in the Elements panel
 
 FEATURES
@@ -54,7 +54,9 @@ FEATURES
 - Works on any website
 - Runs 100% locally, no data sent anywhere
 
-Open source at https://github.com/pbakaus/impeccable
+Open source at https://github.com/git-dann/impeccable
+
+Built by Gitwork.
 
 ## Category
 Developer Tools
@@ -63,7 +65,7 @@ Developer Tools
 English
 
 ## Privacy policy URL
-https://impeccable.style/privacy
+TODO before Chrome Web Store submission: host a real Gitwork-owned privacy policy page for this extension and link it here.
 
 ## Single purpose description
 Detects and highlights UI anti-patterns (AI-generated design tells and general quality issues) on any web page.

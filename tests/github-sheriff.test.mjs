@@ -19,7 +19,7 @@ describe('github sheriff', () => {
       createdAt: '2026-06-30T00:00:00Z',
       latestCommitAt: '2026-06-30T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-07-01T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-07-01T00:00:00Z', '/sheriff wait'),
       ],
     }), { now: NOW });
 
@@ -40,10 +40,10 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-06-20T01:00:00Z',
       labels: ['waiting on contributor', 'stale'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-06-21T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-06-21T00:00:00Z'),
       ],
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
+        comment('git-dann', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
         comment('github-actions[bot]', '2026-06-27T00:00:00Z', WARNING_MARKER),
       ],
     }), { now: NOW });
@@ -58,7 +58,7 @@ describe('github sheriff', () => {
       createdAt: '2026-06-20T00:00:00Z',
       latestCommitAt: '2026-06-20T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-06-21T00:00:00Z', '/sheriff wait'),
       ],
     }), { now: NOW });
 
@@ -74,10 +74,10 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-06-20T01:00:00Z',
       labels: ['waiting on contributor', 'stale'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-06-21T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-06-21T00:00:00Z'),
       ],
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
+        comment('git-dann', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
       ],
     }), { now: NOW });
 
@@ -90,7 +90,7 @@ describe('github sheriff', () => {
       createdAt: '2026-06-20T00:00:00Z',
       latestCommitAt: '2026-06-20T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-06-21T00:00:00Z', '/sheriff wait'),
         comment('drive-by', '2026-06-27T00:00:00Z', WARNING_MARKER),
       ],
     }), { now: NOW });
@@ -104,7 +104,7 @@ describe('github sheriff', () => {
       createdAt: '2026-06-20T00:00:00Z',
       latestCommitAt: '2026-06-20T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-06-21T00:00:00Z', '/sheriff wait'),
         comment('github-actions[bot]', '2026-06-27T00:00:00Z', WARNING_MARKER),
         comment('drive-by', '2026-07-04T00:00:00Z', CLOSE_MARKER),
       ],
@@ -120,7 +120,7 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-06-20T01:00:00Z',
       labels: ['waiting on contributor', 'stale'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-06-21T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-06-21T00:00:00Z'),
       ],
       comments: Array.from({ length: 50 }, (_, index) => (
         comment('review-bot', `2026-06-28T00:${String(index).padStart(2, '0')}:00Z`, 'follow-up')
@@ -129,7 +129,7 @@ describe('github sheriff', () => {
 
     const truncatedPlan = evaluatePullRequest(prUnderReview, { now: NOW });
     mergeIssueComments(prUnderReview, [
-      restComment('pbakaus', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
+      restComment('git-dann', '2026-06-21T00:00:00Z', 'Please fix the review feedback.'),
       restComment('github-actions[bot]', '2026-06-27T00:00:00Z', WARNING_MARKER),
       ...prUnderReview.comments,
     ]);
@@ -154,7 +154,7 @@ describe('github sheriff', () => {
         statusState: 'SUCCESS',
         mergeable: 'MERGEABLE',
         comments: [
-          comment('pbakaus', '2026-07-02T00:00:00Z', body),
+          comment('git-dann', '2026-07-02T00:00:00Z', body),
         ],
       }), { now: NOW });
 
@@ -169,7 +169,7 @@ describe('github sheriff', () => {
       createdAt: '2026-07-04T00:00:00Z',
       latestCommitAt: '2026-07-04T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-07-05T00:00:00Z', [
+        comment('git-dann', '2026-07-05T00:00:00Z', [
           'This needs a maintainer-controlled wait state.',
           '/sheriff wait',
         ].join('\n')),
@@ -202,7 +202,7 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-06-25T01:00:00Z',
       labels: ['waiting on contributor', 'stale', 'blocked: review threads'],
       comments: [
-        comment('pbakaus', '2026-07-01T00:00:00Z', 'Can you split this up?'),
+        comment('git-dann', '2026-07-01T00:00:00Z', 'Can you split this up?'),
         comment('contrib', '2026-07-02T00:00:00Z', 'Done, pushed the split.'),
       ],
     }), { now: NOW });
@@ -220,7 +220,7 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-07-02T00:00:00Z',
       labels: ['waiting on contributor'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-07-03T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-07-03T00:00:00Z'),
       ],
     }), { now: NOW });
 
@@ -237,7 +237,7 @@ describe('github sheriff', () => {
       labelEvents: [],
     });
     mergeIssueLabelEvents(source, [
-      issueEvent('labeled', 'waiting on contributor', 'pbakaus', '2026-07-03T00:00:00Z'),
+      issueEvent('labeled', 'waiting on contributor', 'git-dann', '2026-07-03T00:00:00Z'),
     ]);
 
     const plan = evaluatePullRequest(source, { now: NOW });
@@ -278,7 +278,7 @@ describe('github sheriff', () => {
       latestCommitAt: '2026-07-04T00:00:00Z',
       labels: ['waiting on contributor'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-07-03T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-07-03T00:00:00Z'),
       ],
     }), { now: NOW });
 
@@ -295,10 +295,10 @@ describe('github sheriff', () => {
       latestCommitCommitterLogin: 'web-flow',
       labels: ['waiting on contributor'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-07-02T00:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-07-02T00:00:00Z'),
       ],
       comments: [
-        comment('pbakaus', '2026-07-02T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-07-02T00:00:00Z', '/sheriff wait'),
       ],
     }), { now: NOW });
 
@@ -330,7 +330,7 @@ describe('github sheriff', () => {
       createdAt: '2026-06-20T00:00:00Z',
       labels: ['waiting on contributor', 'stale'],
       labelEvents: [
-        labelEvent('LabeledEvent', 'waiting on contributor', 'pbakaus', '2026-06-21T12:00:00Z'),
+        labelEvent('LabeledEvent', 'waiting on contributor', 'git-dann', '2026-06-21T12:00:00Z'),
       ],
       reviewThreads: [
         {
@@ -440,7 +440,7 @@ describe('github sheriff', () => {
           {
             __typename: 'LabeledEvent',
             label: { name: 'waiting on contributor' },
-            actor: { login: 'pbakaus' },
+            actor: { login: 'git-dann' },
             createdAt: '2026-07-06T00:00:00Z',
           },
         ],
@@ -462,7 +462,7 @@ describe('github sheriff', () => {
       {
         type: 'LabeledEvent',
         label: 'waiting on contributor',
-        actorLogin: 'pbakaus',
+        actorLogin: 'git-dann',
         createdAt: '2026-07-06T00:00:00Z',
       },
     ]);
@@ -508,13 +508,13 @@ describe('github sheriff', () => {
       reviewDecision: 'APPROVED',
       reviews: [
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'CHANGES_REQUESTED',
           submittedAt: '2026-07-02T00:00:00Z',
           body: 'Needs changes.',
         },
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'APPROVED',
           submittedAt: '2026-07-03T00:00:00Z',
           body: 'Looks good now.',
@@ -536,7 +536,7 @@ describe('github sheriff', () => {
       reviewDecision: 'CHANGES_REQUESTED',
       reviews: [
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'CHANGES_REQUESTED',
           submittedAt: '2026-07-07T12:00:00Z',
           body: 'Needs one follow-up.',
@@ -564,7 +564,7 @@ describe('github sheriff', () => {
       ],
       reviews: [
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'CHANGES_REQUESTED',
           submittedAt: '2026-07-07T00:00:00Z',
           body: 'Needs one follow-up.',
@@ -586,7 +586,7 @@ describe('github sheriff', () => {
       reviewDecision: 'CHANGES_REQUESTED',
       reviews: [
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'CHANGES_REQUESTED',
           submittedAt: '2026-07-02T00:00:00Z',
           body: 'Needs changes.',
@@ -607,7 +607,7 @@ describe('github sheriff', () => {
       reviewDecision: 'CHANGES_REQUESTED',
       reviews: [
         {
-          authorLogin: 'pbakaus',
+          authorLogin: 'git-dann',
           state: 'CHANGES_REQUESTED',
           submittedAt: '2026-07-02T00:00:00Z',
           body: 'Needs changes.',
@@ -622,11 +622,11 @@ describe('github sheriff', () => {
 
   it('does not auto-close regular contributors by default', () => {
     const plan = evaluatePullRequest(pr({
-      authorLogin: 'abdulwahabone',
+      authorLogin: 'trusted-contributor',
       createdAt: '2026-06-20T00:00:00Z',
       latestCommitAt: '2026-06-20T01:00:00Z',
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-06-21T00:00:00Z', '/sheriff wait'),
       ],
     }), { now: NOW });
 
@@ -638,7 +638,7 @@ describe('github sheriff', () => {
     const plan = evaluatePullRequest(pr({
       createdAt: '2026-06-20T00:00:00Z',
       comments: [
-        comment('pbakaus', '2026-06-21T00:00:00Z', '/sheriff wait'),
+        comment('git-dann', '2026-06-21T00:00:00Z', '/sheriff wait'),
         comment('github-actions[bot]', '2026-06-27T00:00:00Z', WARNING_MARKER),
         comment('github-actions[bot]', '2026-07-04T00:00:00Z', CLOSE_MARKER),
       ],
@@ -650,18 +650,18 @@ describe('github sheriff', () => {
 
   it('parses aggressive stale windows from CLI args', () => {
     const parsed = parseArgs([
-      '--repo', 'pbakaus/impeccable',
+      '--repo', 'pbakaus/design-doctor',
       '--apply',
       '--warning-days', '7',
       '--close-days', '14',
-      '--maintainers', 'pbakaus,other',
+      '--maintainers', 'git-dann,other',
     ]);
 
     assert.equal(parsed.apply, true);
-    assert.equal(parsed.repo, 'pbakaus/impeccable');
+    assert.equal(parsed.repo, 'pbakaus/design-doctor');
     assert.equal(parsed.warningDays, 7);
     assert.equal(parsed.closeDays, 14);
-    assert.deepEqual(parsed.maintainers, ['pbakaus', 'other']);
+    assert.deepEqual(parsed.maintainers, ['git-dann', 'other']);
   });
 });
 
@@ -717,7 +717,7 @@ function graphqlPrNode(overrides = {}) {
   return {
     number: 123,
     title: 'Test PR',
-    url: 'https://github.com/pbakaus/impeccable/pull/123',
+    url: 'https://github.com/pbakaus/design-doctor/pull/123',
     isDraft: false,
     createdAt: '2026-07-01T00:00:00Z',
     updatedAt: '2026-07-01T00:00:00Z',

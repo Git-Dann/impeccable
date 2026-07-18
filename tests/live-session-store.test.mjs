@@ -14,13 +14,13 @@ import {
   getLegacyLiveSessionsDir,
   getLiveAnnotationsDir,
   getLiveSessionsDir,
-} from '../skill/scripts/lib/impeccable-paths.mjs';
+} from '../skill/scripts/lib/design-doctor-paths.mjs';
 
 describe('live-session-store', () => {
   let tmp;
 
   beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'impeccable-session-store-'));
+    tmp = mkdtempSync(join(tmpdir(), 'design-doctor-session-store-'));
   });
 
   afterEach(() => {
@@ -253,7 +253,7 @@ describe('live-session-store', () => {
     assert.equal(repaired.sourceFile, 'src/pages/index.astro');
   });
 
-  it('recovers legacy journals from .impeccable-live/sessions', () => {
+  it('recovers legacy journals from .design-doctor-live/sessions', () => {
     const legacyDir = getLegacyLiveSessionsDir(tmp);
     mkdirSync(legacyDir, { recursive: true });
     appendFileSync(join(legacyDir, 'legacy-session.jsonl'), JSON.stringify({

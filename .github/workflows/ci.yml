@@ -109,7 +109,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: impeccable-dist-node-${{ matrix.node-version }}
+          name: design-doctor-dist-node-${{ matrix.node-version }}
           # Ship the packaged zips, not the unpacked Firefox staging tree.
           path: |
             dist/
@@ -206,12 +206,12 @@ jobs:
       - name: Run live E2E tests
         run: bun run test:live-e2e
         env:
-          IMPECCABLE_E2E_ONLY: ${{ matrix.fixtures }}
-          IMPECCABLE_E2E_SCENARIOS: core
-          IMPECCABLE_E2E_TEST_TIMEOUT_MS: 180000
-          IMPECCABLE_E2E_INSTALL_TIMEOUT_MS: 120000
-          IMPECCABLE_E2E_DEV_READY_TIMEOUT_MS: 60000
-          IMPECCABLE_E2E_ARTIFACT_DIR: test-results/live-e2e/${{ matrix.group }}
+          DESIGN_DOCTOR_E2E_ONLY: ${{ matrix.fixtures }}
+          DESIGN_DOCTOR_E2E_SCENARIOS: core
+          DESIGN_DOCTOR_E2E_TEST_TIMEOUT_MS: 180000
+          DESIGN_DOCTOR_E2E_INSTALL_TIMEOUT_MS: 120000
+          DESIGN_DOCTOR_E2E_DEV_READY_TIMEOUT_MS: 60000
+          DESIGN_DOCTOR_E2E_ARTIFACT_DIR: test-results/live-e2e/${{ matrix.group }}
 
       - name: Upload live E2E failure artifacts
         if: failure()
@@ -280,11 +280,11 @@ jobs:
       - name: Run live E2E tests
         run: bun run test:live-e2e
         env:
-          IMPECCABLE_E2E_ONLY: ${{ matrix.fixtures }}
-          IMPECCABLE_E2E_TEST_TIMEOUT_MS: 300000
-          IMPECCABLE_E2E_INSTALL_TIMEOUT_MS: 180000
-          IMPECCABLE_E2E_DEV_READY_TIMEOUT_MS: 120000
-          IMPECCABLE_E2E_ARTIFACT_DIR: test-results/live-e2e/${{ matrix.group }}
+          DESIGN_DOCTOR_E2E_ONLY: ${{ matrix.fixtures }}
+          DESIGN_DOCTOR_E2E_TEST_TIMEOUT_MS: 300000
+          DESIGN_DOCTOR_E2E_INSTALL_TIMEOUT_MS: 180000
+          DESIGN_DOCTOR_E2E_DEV_READY_TIMEOUT_MS: 120000
+          DESIGN_DOCTOR_E2E_ARTIFACT_DIR: test-results/live-e2e/${{ matrix.group }}
 
       - name: Upload live E2E failure artifacts
         if: failure()
@@ -353,9 +353,9 @@ jobs:
         if: ${{ env.ANTHROPIC_API_KEY != '' || env.DEEPSEEK_API_KEY != '' }}
         run: |
           if [ -n "$DEEPSEEK_API_KEY" ]; then
-            export IMPECCABLE_E2E_LLM_PROVIDER=deepseek
+            export DESIGN_DOCTOR_E2E_LLM_PROVIDER=deepseek
           else
-            export IMPECCABLE_E2E_LLM_PROVIDER=anthropic
+            export DESIGN_DOCTOR_E2E_LLM_PROVIDER=anthropic
           fi
           bun run test:live-e2e-accept-cleanup
 

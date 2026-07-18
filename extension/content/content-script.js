@@ -1,5 +1,5 @@
 /**
- * Impeccable DevTools Extension - Content Script
+ * Design Doctor DevTools Extension - Content Script
  *
  * Bridges between the extension messaging system and the page-context detector.
  * The detector must run in page context (not isolated world) because it needs
@@ -11,8 +11,8 @@
  *   - Duplicate event listeners accumulating over time
  */
 (function () {
-  if (window.__IMPECCABLE_CS_LOADED__) return;
-  window.__IMPECCABLE_CS_LOADED__ = true;
+  if (window.__DESIGN_DOCTOR_CS_LOADED__) return;
+  window.__DESIGN_DOCTOR_CS_LOADED__ = true;
 
   let injected = false;
   let pendingScan = false;
@@ -25,17 +25,17 @@
       injectAndScan();
       sendResponse({ ok: true });
     } else if (msg.action === 'toggle-overlays') {
-      window.postMessage({ source: 'impeccable-command', action: 'toggle-overlays' }, '*');
+      window.postMessage({ source: 'design-doctor-command', action: 'toggle-overlays' }, '*');
       sendResponse({ ok: true });
     } else if (msg.action === 'remove') {
-      window.postMessage({ source: 'impeccable-command', action: 'remove' }, '*');
+      window.postMessage({ source: 'design-doctor-command', action: 'remove' }, '*');
       injected = false;
       sendResponse({ ok: true });
     } else if (msg.action === 'highlight') {
-      window.postMessage({ source: 'impeccable-command', action: 'highlight', selector: msg.selector }, '*');
+      window.postMessage({ source: 'design-doctor-command', action: 'highlight', selector: msg.selector }, '*');
       sendResponse({ ok: true });
     } else if (msg.action === 'unhighlight') {
-      window.postMessage({ source: 'impeccable-command', action: 'unhighlight' }, '*');
+      window.postMessage({ source: 'design-doctor-command', action: 'unhighlight' }, '*');
       sendResponse({ ok: true });
     }
     return true;
@@ -45,7 +45,7 @@
   window.addEventListener('message', (e) => {
     if (e.source !== window || !e.data) return;
 
-    if (e.data.source === 'impeccable-results') {
+    if (e.data.source === 'design-doctor-results') {
       chrome.runtime.sendMessage({
         action: 'findings',
         findings: e.data.findings,
@@ -53,14 +53,14 @@
       }).catch(() => {});
     }
 
-    if (e.data.source === 'impeccable-overlays-toggled') {
+    if (e.data.source === 'design-doctor-overlays-toggled') {
       chrome.runtime.sendMessage({
         action: 'overlays-toggled',
         visible: e.data.visible,
       }).catch(() => {});
     }
 
-    if (e.data.source === 'impeccable-ready') {
+    if (e.data.source === 'design-doctor-ready') {
       injected = true;
       if (pendingScan) {
         pendingScan = false;
@@ -95,7 +95,7 @@
   window.addEventListener('hashchange', onPossibleNavigation);
 
   function sendScanCommand() {
-    const msg = { source: 'impeccable-command', action: 'scan' };
+    const msg = { source: 'design-doctor-command', action: 'scan' };
     if (scanConfig) msg.config = scanConfig;
     window.postMessage(msg, '*');
   }
@@ -107,12 +107,12 @@
     }
 
     // Set the extension flag via a data attribute (CSP-safe: content scripts share the DOM)
-    document.documentElement.dataset.impeccableExtension = 'true';
+    document.documentElement.dataset.designDoctorExtension = 'true';
 
     // Inject the detector script into page context
     const script = document.createElement('script');
     script.src = chrome.runtime.getURL('detector/detect.js');
-    script.dataset.impeccableExtension = 'true';
+    script.dataset.designDoctorExtension = 'true';
     pendingScan = true;
     script.onload = () => script.remove();
     script.onerror = () => {

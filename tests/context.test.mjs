@@ -5,7 +5,7 @@
  * Covers the resolution order:
  *   1. cwd, when canonical files are at the root
  *   2. Auto-fallback to .agents/context/ then docs/
- *   3. IMPECCABLE_CONTEXT_DIR env var as a power-user escape hatch (only
+ *   3. DESIGN_DOCTOR_CONTEXT_DIR env var as a power-user escape hatch (only
  *      consulted when the default paths come up empty)
  *   4. Default to cwd when nothing is found
  *
@@ -30,14 +30,14 @@ let scratch;
 let savedEnv;
 
 beforeEach(() => {
-  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-loadctx-'));
-  savedEnv = process.env.IMPECCABLE_CONTEXT_DIR;
-  delete process.env.IMPECCABLE_CONTEXT_DIR;
+  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-loadctx-'));
+  savedEnv = process.env.DESIGN_DOCTOR_CONTEXT_DIR;
+  delete process.env.DESIGN_DOCTOR_CONTEXT_DIR;
 });
 
 afterEach(() => {
-  if (savedEnv === undefined) delete process.env.IMPECCABLE_CONTEXT_DIR;
-  else process.env.IMPECCABLE_CONTEXT_DIR = savedEnv;
+  if (savedEnv === undefined) delete process.env.DESIGN_DOCTOR_CONTEXT_DIR;
+  else process.env.DESIGN_DOCTOR_CONTEXT_DIR = savedEnv;
   fs.rmSync(scratch, { recursive: true, force: true });
 });
 
@@ -87,32 +87,32 @@ describe('resolveContextDir', () => {
     assert.equal(resolveContextDir(scratch), scratch);
   });
 
-  it('uses IMPECCABLE_CONTEXT_DIR as a fallback when defaults are empty (relative path)', () => {
+  it('uses DESIGN_DOCTOR_CONTEXT_DIR as a fallback when defaults are empty (relative path)', () => {
     write('design/PRODUCT.md');
-    process.env.IMPECCABLE_CONTEXT_DIR = 'design';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = 'design';
     assert.equal(resolveContextDir(scratch), path.join(scratch, 'design'));
   });
 
-  it('uses IMPECCABLE_CONTEXT_DIR as a fallback when defaults are empty (absolute path)', () => {
-    const elsewhere = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-elsewhere-'));
+  it('uses DESIGN_DOCTOR_CONTEXT_DIR as a fallback when defaults are empty (absolute path)', () => {
+    const elsewhere = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-elsewhere-'));
     try {
-      process.env.IMPECCABLE_CONTEXT_DIR = elsewhere;
+      process.env.DESIGN_DOCTOR_CONTEXT_DIR = elsewhere;
       assert.equal(resolveContextDir(scratch), elsewhere);
     } finally {
       fs.rmSync(elsewhere, { recursive: true, force: true });
     }
   });
 
-  it('default paths win over IMPECCABLE_CONTEXT_DIR (lazy escape hatch)', () => {
+  it('default paths win over DESIGN_DOCTOR_CONTEXT_DIR (lazy escape hatch)', () => {
     write('PRODUCT.md', 'root');
     write('design/PRODUCT.md', 'overridden');
-    process.env.IMPECCABLE_CONTEXT_DIR = 'design';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = 'design';
     assert.equal(resolveContextDir(scratch), scratch);
   });
 
-  it('ignores empty IMPECCABLE_CONTEXT_DIR', () => {
+  it('ignores empty DESIGN_DOCTOR_CONTEXT_DIR', () => {
     write('PRODUCT.md');
-    process.env.IMPECCABLE_CONTEXT_DIR = '   ';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = '   ';
     assert.equal(resolveContextDir(scratch), scratch);
   });
 
@@ -479,7 +479,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     const selection = parseTargetSelection(res.stdout);
@@ -510,7 +510,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.doesNotMatch(res.stdout, /MONOREPO_TARGET_REQUIRED/);
@@ -523,7 +523,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH, '--target', 'apps/dashboard/src/App.jsx'], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /# Dashboard product/);
@@ -540,7 +540,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /TARGET_SELECTION_REQUIRED:/);
@@ -565,7 +565,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     const selection = parseTargetSelection(res.stdout);
@@ -626,7 +626,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     const selection = parseTargetSelection(res.stdout);
@@ -648,7 +648,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /TARGET_SELECTION_REQUIRED:/);
@@ -665,7 +665,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     const selection = parseTargetSelection(res.stdout);
@@ -682,7 +682,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.doesNotMatch(res.stdout, /TARGET_SELECTION_REQUIRED/);
@@ -694,7 +694,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH, '--target', '.'], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /# PRODUCT\.md\n\n# Root product/);
@@ -708,7 +708,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH, '--target', '--help'], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 1);
     assert.match(res.stderr, /--target requires a path value/);
@@ -727,7 +727,7 @@ describe('loadContext (monorepo project context)', () => {
     ], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0, res.stderr);
     assert.match(res.stdout, /# Dashboard product/);
@@ -740,7 +740,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH, '--target', 'apps/dashboard/routes/pricing'], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
 
     assert.equal(res.status, 0, res.stderr);
@@ -760,7 +760,7 @@ describe('loadContext (monorepo project context)', () => {
     const res = spawnSync(process.execPath, [SCRIPT_PATH], {
       cwd: scratch,
       encoding: 'utf8',
-      env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' },
+      env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' },
     });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /TARGET_SELECTION_REQUIRED:/);
@@ -769,11 +769,11 @@ describe('loadContext (monorepo project context)', () => {
   });
 });
 
-describe('loadContext (IMPECCABLE_CONTEXT_DIR escape hatch)', () => {
+describe('loadContext (DESIGN_DOCTOR_CONTEXT_DIR escape hatch)', () => {
   it('reads from the override path when defaults are empty', () => {
     write('design/PRODUCT.md', '# overridden product\n');
     write('design/DESIGN.md', '# overridden design\n');
-    process.env.IMPECCABLE_CONTEXT_DIR = 'design';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = 'design';
     const ctx = loadContext(scratch);
     assert.equal(ctx.hasProduct, true);
     assert.equal(ctx.hasDesign, true);
@@ -784,14 +784,14 @@ describe('loadContext (IMPECCABLE_CONTEXT_DIR escape hatch)', () => {
   it('does not override defaults when both exist (lazy escape hatch)', () => {
     write('PRODUCT.md', '# root product\n');
     write('design/PRODUCT.md', '# overridden product\n');
-    process.env.IMPECCABLE_CONTEXT_DIR = 'design';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = 'design';
     const ctx = loadContext(scratch);
     assert.match(ctx.product, /root product/);
     assert.equal(ctx.contextDir, scratch);
   });
 
   it('reports a missing override directory as no-context, not as a crash', () => {
-    process.env.IMPECCABLE_CONTEXT_DIR = 'no/such/dir';
+    process.env.DESIGN_DOCTOR_CONTEXT_DIR = 'no/such/dir';
     const ctx = loadContext(scratch);
     assert.equal(ctx.hasProduct, false);
     assert.equal(ctx.hasDesign, false);
@@ -863,7 +863,7 @@ describe('extractPlatform', () => {
 describe('context.mjs CLI', () => {
   it('emits NO_PRODUCT_MD directive when no PRODUCT.md is found', async () => {
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /^NO_PRODUCT_MD:/);
     assert.match(res.stdout, /reference\/init\.md/);
@@ -872,7 +872,7 @@ describe('context.mjs CLI', () => {
   it('prints a PRODUCT.md markdown block when only PRODUCT.md exists', async () => {
     write('PRODUCT.md', '# Acme\n\nbody\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /^# PRODUCT\.md/);
     assert.match(res.stdout, /# Acme/);
@@ -885,7 +885,7 @@ describe('context.mjs CLI', () => {
     write('PRODUCT.md', '# Acme product\n');
     write('DESIGN.md', '# Acme design\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /^# PRODUCT\.md/);
     assert.match(res.stdout, /\n---\n/);
@@ -896,7 +896,7 @@ describe('context.mjs CLI', () => {
   it('reads from a fallback dir when cwd is clean', async () => {
     write('.agents/context/PRODUCT.md', '# fallback product\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /^# PRODUCT\.md/);
     assert.match(res.stdout, /# fallback product/);
@@ -905,7 +905,7 @@ describe('context.mjs CLI', () => {
   it('names the register-specific reference when PRODUCT.md declares one', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nbrand\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /NEXT STEP: This project's register is `brand`\./);
     assert.match(res.stdout, /read `reference\/brand\.md`/);
@@ -914,7 +914,7 @@ describe('context.mjs CLI', () => {
   it('falls back to a generic register directive when no register field is present', async () => {
     write('PRODUCT.md', '# Acme\n\n(no register field)\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /NEXT STEP: You MUST now read the matching register reference/);
     assert.match(res.stdout, /reference\/brand\.md.*reference\/product\.md/);
@@ -923,7 +923,7 @@ describe('context.mjs CLI', () => {
   it('appends a native platform directive for an ios project', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\nios\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /This project targets `ios`\./);
     assert.match(res.stdout, /read `reference\/ios\.md`/);
@@ -932,7 +932,7 @@ describe('context.mjs CLI', () => {
   it('appends both native directives for an adaptive project', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\nadaptive\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /targets `adaptive` \(both iOS and Android\)/);
     assert.match(res.stdout, /reference\/ios\.md` and `reference\/android\.md`/);
@@ -941,7 +941,7 @@ describe('context.mjs CLI', () => {
   it('appends no native platform directive for a web project', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\nweb\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.equal(res.stdout.includes('This project targets'), false);
     assert.equal(res.stdout.includes('reference/ios.md'), false);
@@ -950,7 +950,7 @@ describe('context.mjs CLI', () => {
   it('appends a native platform directive for an android project', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\nandroid\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /This project targets `android`\./);
     assert.match(res.stdout, /read `reference\/android\.md`/);
@@ -962,7 +962,7 @@ describe('context.mjs CLI', () => {
     // projects that tried to declare themselves native.
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\nflutter\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.match(res.stdout, /WARNING: PRODUCT\.md's `## Platform` value `flutter` is not recognized/);
     assert.match(res.stdout, /treating the project as `web`/);
@@ -972,7 +972,7 @@ describe('context.mjs CLI', () => {
   it('emits no warning for an empty Platform section', async () => {
     write('PRODUCT.md', '# Acme\n\n## Register\n\nproduct\n\n## Platform\n\n## Users\n\nAnglers.\n');
     const { spawnSync } = await import('node:child_process');
-    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, IMPECCABLE_NO_UPDATE_CHECK: '1' } });
+    const res = spawnSync(process.execPath, [SCRIPT_PATH], { cwd: scratch, encoding: 'utf8', env: { ...process.env, DESIGN_DOCTOR_NO_UPDATE_CHECK: '1' } });
     assert.equal(res.status, 0);
     assert.equal(res.stdout.includes('WARNING: PRODUCT.md'), false);
     assert.equal(res.stdout.includes('This project targets'), false);
@@ -1001,7 +1001,7 @@ describe('context.mjs update check', () => {
     fs.copyFileSync(providerSrc, providerDest);
     fs.writeFileSync(
       path.join(scratch, 'skill', 'SKILL.md'),
-      `---\nname: impeccable\nversion: ${LOCAL_VERSION}\n---\n\nbody\n`,
+      `---\nname: design-doctor\nversion: ${LOCAL_VERSION}\n---\n\nbody\n`,
     );
     fs.writeFileSync(cachePath(), JSON.stringify(cacheObj));
     const project = path.join(scratch, 'project');
@@ -1009,9 +1009,9 @@ describe('context.mjs update check', () => {
     fs.writeFileSync(path.join(project, 'PRODUCT.md'), '# Acme\n');
     const env = {
       ...process.env,
-      IMPECCABLE_UPDATE_CACHE: cachePath(),
-      IMPECCABLE_NO_UPDATE_CHECK: disable ? '1' : '',
-      ...(host ? { IMPECCABLE_UPDATE_HOST: host } : {}),
+      DESIGN_DOCTOR_UPDATE_CACHE: cachePath(),
+      DESIGN_DOCTOR_NO_UPDATE_CHECK: disable ? '1' : '',
+      ...(host ? { DESIGN_DOCTOR_UPDATE_HOST: host } : {}),
     };
     return { skillScript, project, env };
   }
@@ -1043,9 +1043,9 @@ describe('context.mjs update check', () => {
   it('appends UPDATE_AVAILABLE when the cached latest version is newer', () => {
     const res = run({ lastCheck: Date.now(), latestVersion: '2.0.0' });
     assert.equal(res.status, 0);
-    assert.match(res.stdout, /UPDATE_AVAILABLE: A newer Impeccable skill is available/);
+    assert.match(res.stdout, /UPDATE_AVAILABLE: A newer Design Doctor skill is available/);
     assert.match(res.stdout, /installed v1\.0\.0, latest v2\.0\.0/);
-    assert.match(res.stdout, /npx impeccable update/);
+    assert.match(res.stdout, /npx design-doctor update/);
     // It must come after the real context, never replace it.
     assert.match(res.stdout, /^# PRODUCT\.md/);
   });
@@ -1067,7 +1067,7 @@ describe('context.mjs update check', () => {
     assert.equal(res.stdout.includes('UPDATE_AVAILABLE'), false);
   });
 
-  it('respects IMPECCABLE_NO_UPDATE_CHECK', () => {
+  it('respects DESIGN_DOCTOR_NO_UPDATE_CHECK', () => {
     const res = run({ lastCheck: Date.now(), latestVersion: '2.0.0' }, { disable: true });
     assert.equal(res.status, 0);
     assert.equal(res.stdout.includes('UPDATE_AVAILABLE'), false);

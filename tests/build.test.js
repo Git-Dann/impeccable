@@ -345,9 +345,9 @@ function resolveBundledImport(importerName, specifier, names) {
 }
 
 // Regression guard for issue #254: the bundled detector imported
-// `../../lib/impeccable-config.mjs`, a file that lives outside `cli/engine` and
-// was never copied into the bundle, so `/impeccable critique` crashed with
-// "Cannot find module .../lib/impeccable-config.mjs". This walks every bundled
+// `../../lib/design-doctor-config.mjs`, a file that lives outside `cli/engine` and
+// was never copied into the bundle, so `/design-doctor critique` crashed with
+// "Cannot find module .../lib/design-doctor-config.mjs". This walks every bundled
 // script and asserts each relative import resolves to another bundled file, so
 // any future out-of-bundle dependency fails the build instead of the user.
 describe('bundled skill scripts are self-contained', () => {
@@ -366,7 +366,7 @@ describe('bundled skill scripts are self-contained', () => {
   const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
 
   test('the detector bundle includes its config dependency', () => {
-    expect(names.has('lib/impeccable-config.mjs')).toBe(true);
+    expect(names.has('lib/design-doctor-config.mjs')).toBe(true);
   });
 
   test('every relative import resolves to a bundled file', () => {

@@ -1,12 +1,11 @@
 {
-  "name": "impeccable",
-  "description": "Design fluency for frontend development. 1 skill with 23 commands (/impeccable polish, /impeccable audit, /impeccable critique, etc.) and curated anti-pattern detection.",
+  "name": "design-doctor",
+  "description": "Design fluency for frontend development. 1 skill with 23 commands (/design-doctor polish, /design-doctor audit, /design-doctor critique, etc.) and curated anti-pattern detection.",
   "version": "3.9.1",
   "author": {
-    "name": "Paul Bakaus",
-    "email": "paul@paulbakaus.com"
+    "name": "Gitwork"
   },
-  "homepage": "https://impeccable.style",
-  "repository": "https://github.com/pbakaus/impeccable",
+  "homepage": "https://github.com/git-dann/impeccable",
+  "repository": "https://github.com/git-dann/impeccable",
   "skills": "./.claude/skills/"
 }

@@ -24,7 +24,7 @@ Resolve one stable target, run two independent assessments, synthesize a design 
    node {{scripts_path}}/critique-storage.mjs slug "<resolved-path-or-url>"
    ```
    Keep it. If the command exits non-zero, skip persistence and trend for this run, but continue the critique.
-3. **Read `.impeccable/critique/ignore.md`** if it exists. Drop matching findings silently; it is the only prior-run input critique consumes.
+3. **Read `.design-doctor/critique/ignore.md`** if it exists. Drop matching findings silently; it is the only prior-run input critique consumes.
 
 ### Assessment Orchestration
 
@@ -40,7 +40,7 @@ Sub-agent gate (all harnesses):
 Codex sub-agent gate (overrides the default above; Codex's permission model requires asking before spawning):
 - Asking is the normal path, not a degradation. Approving and spawning is the dual-agent path; do not emit the degraded banner just for asking.
 - If `spawn_agent` is exposed and the user explicitly allowed sub-agents, delegation, or parallel agent work, spawn A and B immediately.
-- If `spawn_agent` is exposed but the user did not explicitly allow sub-agents, ask exactly once: "Impeccable critique is designed to run two independent sub-agents for an unanchored assessment. May I use sub-agents for this critique?" Then stop until the user answers.
+- If `spawn_agent` is exposed but the user did not explicitly allow sub-agents, ask exactly once: "Design Doctor critique is designed to run two independent sub-agents for an unanchored assessment. May I use sub-agents for this critique?" Then stop until the user answers.
 - If allowed, spawn A and B. If declined, run sequentially and lead the report with `⚠️ DEGRADED: single-context (sub-agents declined by user)`.
 - If `spawn_agent` is not exposed, do not ask; run sequentially and lead with `⚠️ DEGRADED: single-context (spawn_agent unavailable in this session)`.
 - If spawning fails after permission, run sequentially and lead with `⚠️ DEGRADED: single-context (sub-agent spawn failed: <exact error>)`.
@@ -54,7 +54,7 @@ If browser automation is available, each assessment creates its own new tab. Nev
 Read relevant source files and visually inspect the live page when browser automation is available. Think like a design director.
 
 Evaluate:
-- **AI slop**: Would someone believe "AI made this" immediately? Check all DON'T guidance from the parent Impeccable skill.
+- **AI slop**: Would someone believe "AI made this" immediately? Check all DON'T guidance from the parent Design Doctor skill.
 - **Holistic design**: hierarchy, IA, emotional fit, discoverability, composition, typography, color, accessibility, states, copy, and edge cases.
 - **Cognitive load**: consult the [Cognitive Load Assessment](#cognitive-load-assessment) section below; report checklist failures and decision points with >4 visible options.
 - **Emotional journey**: peak-end rule, emotional valleys, reassurance at high-stakes moments.
@@ -82,11 +82,11 @@ Browser visualization is required for a viewable target when browser automation 
 1. Create a fresh tab and navigate. Prefer the harness's native/browser-canvas screenshot path before hand-rolling a Playwright/Puppeteer script; only fall back to a custom script when no native browser tool is exposed.
 2. Preflight mutable injection by setting `document.title` and appending a `<script>` tag. Read-only evaluate APIs do not count.
 3. If mutation is unavailable, skip live server, browser presentation, and injection; report fallback signal.
-4. If mutation is available, start `node {{scripts_path}}/live-server.mjs --background`, present the browser if supported, label `[Human]`, scroll top, inject `http://localhost:PORT/detect.js`, wait 2-3 seconds, read `impeccable` console messages, then stop the live server.
+4. If mutation is available, start `node {{scripts_path}}/live-server.mjs --background`, present the browser if supported, label `[Human]`, scroll top, inject `http://localhost:PORT/detect.js`, wait 2-3 seconds, read `design-doctor` console messages, then stop the live server.
 5. For multi-view targets, inject on 3-5 representative pages.
 
 <codex>
-Codex Browser note: Use the Browser skill. Do not spend a Browser attempt on `file://`. Only call `visibility.set(true)` after mutable script injection is confirmed for the `[Human]` overlay path; verify with `get()`. Use `tab.dev.logs({ filter: "impeccable" })` for console results. Its Playwright `evaluate(...)` surface is read-only; do not rely on it for mutation.
+Codex Browser note: Use the Browser skill. Do not spend a Browser attempt on `file://`. Only call `visibility.set(true)` after mutable script injection is confirmed for the `[Human]` overlay path; verify with `get()`. Use `tab.dev.logs({ filter: "design-doctor" })` for console results. Its Playwright `evaluate(...)` surface is read-only; do not rely on it for mutation.
 </codex>
 
 Return: CLI findings JSON/counts, browser console findings if applicable, false positives, and skipped/failed browser steps with concrete reasons.
@@ -104,7 +104,7 @@ Synthesize both assessments into a single report. Do NOT simply concatenate. Wea
 The chat response is the primary user-facing deliverable. Present the full structured critique below in chat; do not replace it with a summary and a link. The persisted snapshot is only an archive/backlog for later commands.
 
 <codex>
-Codex final-answer note: `$impeccable critique` produces a report artifact, so the final chat response should intentionally exceed the usual concise close-out style. Do not title the final response "Critique Summary" unless the user explicitly asked for a summary.
+Codex final-answer note: `$design-doctor critique` produces a report artifact, so the final chat response should intentionally exceed the usual concise close-out style. Do not title the final response "Critique Summary" unless the user explicitly asked for a summary.
 </codex>
 
 Structure your feedback as a design director would:
@@ -164,7 +164,7 @@ For each issue, tag with **P0-P3 severity** (see [Issue Severity below](#issue-s
 #### Persona Red Flags
 > *Consult the [Personas reference](#persona-based-design-testing) below.*
 
-Auto-select 2-3 personas most relevant to this interface type (use the selection table in the reference). If `{{config_file}}` contains a `## Design Context` section from `impeccable init`, also generate 1-2 project-specific personas from the audience/brand info.
+Auto-select 2-3 personas most relevant to this interface type (use the selection table in the reference). If `{{config_file}}` contains a `## Design Context` section from `design-doctor init`, also generate 1-2 project-specific personas from the audience/brand info.
 
 For each selected persona, walk through the primary user action and list specific red flags found:
 
@@ -200,7 +200,7 @@ Codex Run Notes are final-chat only. Do not include this section in the persiste
 
 ### Persist the Snapshot
 
-Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `{{command_prefix}}impeccable polish` can pick up the priority issues without a copy-paste.
+Once the report above is finalized, write it to `.design-doctor/critique/` so the user can refer back, and so `{{command_prefix}}design-doctor polish` can pick up the priority issues without a copy-paste.
 
 Skip this step if the Setup slug was null (vague or root-level target).
 
@@ -210,9 +210,9 @@ Skip this step if the Setup slug was null (vague or root-level target).
    Codex: exclude Run Notes from the temp body file; Run Notes are final-chat only because persistence, trend read, and temp cleanup happen after the snapshot write.
    </codex>
 
-2. **Pass the structured metadata** through `IMPECCABLE_CRITIQUE_META` (JSON), then run the write command:
+2. **Pass the structured metadata** through `DESIGN_DOCTOR_CRITIQUE_META` (JSON), then run the write command:
    ```bash
-   IMPECCABLE_CRITIQUE_META='{"target":"<user phrasing>","total_score":<n>,"p0_count":<n>,"p1_count":<n>}' \
+   DESIGN_DOCTOR_CRITIQUE_META='{"target":"<user phrasing>","total_score":<n>,"p0_count":<n>,"p1_count":<n>}' \
      node {{scripts_path}}/critique-storage.mjs write <slug> <body-file>
    ```
    The helper prints the absolute path it wrote.
@@ -228,7 +228,7 @@ Skip this step if the Setup slug was null (vague or root-level target).
 5. **Append a single line to the user-visible output**, after the report and before the questions:
 
    > **Trend for `<slug>` (last 5 runs): 24 → 28 → 32 → 29 → 32**
-   > Wrote `.impeccable/critique/<filename>`.
+   > Wrote `.design-doctor/critique/<filename>`.
 
    If this is the first run for the slug, the trend is just one score; say so: "First run for this target, no trend yet."
 
@@ -278,13 +278,13 @@ List recommended commands in priority order, based on the user's answers:
 - Skip commands that would address zero issues
 - If the user chose a limited scope, only include items within that scope
 - If the user marked areas as off-limits, exclude commands that would touch those areas
-- End with `{{command_prefix}}impeccable polish` as the final step if any fixes were recommended
+- End with `{{command_prefix}}design-doctor polish` as the final step if any fixes were recommended
 
 After presenting the summary, tell the user:
 
 > You can ask me to run these one at a time, all at once, or in any order you prefer.
 >
-> Re-run `{{command_prefix}}impeccable critique` after fixes to see your score improve.
+> Re-run `{{command_prefix}}design-doctor critique` after fixes to see your score improve.
 
 ---
 
@@ -800,7 +800,7 @@ Choose personas based on the interface type:
 
 #### Project-Specific Personas
 
-If `{{config_file}}` contains a `## Design Context` section (generated by `impeccable init`), derive 1–2 additional personas from the audience and brand information:
+If `{{config_file}}` contains a `## Design Context` section (generated by `design-doctor init`), derive 1–2 additional personas from the audience and brand information:
 
 1. Read the target audience description
 2. Identify the primary user archetype not covered by the 5 predefined personas

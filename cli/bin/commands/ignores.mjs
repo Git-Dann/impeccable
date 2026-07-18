@@ -7,7 +7,7 @@ import {
   readDetectionConfig,
   readRawDetectionConfig,
   writeDetectionConfig,
-} from '../../lib/impeccable-config.mjs';
+} from '../../lib/design-doctor-config.mjs';
 
 const ACTION_ALIASES = new Map([
   ['status', 'list'],
@@ -30,9 +30,9 @@ const ACTION_ALIASES = new Map([
 ]);
 
 function printUsage() {
-  console.log(`Usage: impeccable ignores <action> [options]
+  console.log(`Usage: design-doctor ignores <action> [options]
 
-Manage detector ignores in .impeccable config.
+Manage detector ignores in .design-doctor config.
 
 Actions:
   list                                  Show merged, shared, and local ignores
@@ -45,8 +45,8 @@ Actions:
   clear                                 Clear detector ignores in the selected scope
 
 Scope:
-  --shared                              Write .impeccable/config.json (default)
-  --local                               Write .impeccable/config.local.json
+  --shared                              Write .design-doctor/config.json (default)
+  --local                               Write .design-doctor/config.local.json
   --all                                 For remove/clear, apply to shared and local
 
 Value options:
@@ -54,10 +54,10 @@ Value options:
   --reason <text>                       Store or update a reason on add-value
 
 Examples:
-  impeccable ignores add-file "src/legacy/**"
-  impeccable ignores add-value overused-font Inter --reason "Brand font"
-  impeccable ignores add-value design-system-color "*" --file "src/demo.css"
-  impeccable ignores remove-value overused-font Inter`);
+  design-doctor ignores add-file "src/legacy/**"
+  design-doctor ignores add-value overused-font Inter --reason "Brand font"
+  design-doctor ignores add-value design-system-color "*" --file "src/demo.css"
+  design-doctor ignores remove-value overused-font Inter`);
 }
 
 function parseScope(args, { allowAll = false } = {}) {
@@ -107,7 +107,7 @@ function parseValueArgs(args, { allowUnscopedWildcard = false } = {}) {
 
   const [rule, ...valueParts] = positionals;
   const value = normalizeIgnoreValue(valueParts.join(' '));
-  if (!rule || !value) throw new Error('Pass a rule id and value, e.g. impeccable ignores add-value overused-font Inter');
+  if (!rule || !value) throw new Error('Pass a rule id and value, e.g. design-doctor ignores add-value overused-font Inter');
   const scopedFiles = Array.from(new Set(files.filter(Boolean)));
   if (value === '*' && scopedFiles.length === 0 && !allowUnscopedWildcard) {
     throw new Error('Wildcard value ignores must be scoped with --file <glob>.');
@@ -148,7 +148,7 @@ function list(cwd) {
   const shared = readRawDetectionConfig(cwd);
   const local = readRawDetectionConfig(cwd, { local: true });
   return [
-    'Impeccable detector ignores',
+    'Design Doctor detector ignores',
     `  shared file: ${path.relative(cwd, getConfigPath(cwd)) || getConfigPath(cwd)}`,
     `  local file:  ${path.relative(cwd, getLocalConfigPath(cwd)) || getLocalConfigPath(cwd)}`,
     '',
@@ -196,7 +196,7 @@ function parseRuleArgs(args) {
 function addRule(cwd, args) {
   const { local, rest } = parseScope(args);
   const { rule, allValues } = parseRuleArgs(rest);
-  if (!rule) throw new Error('Pass a rule id, e.g. impeccable ignores add-rule side-tab');
+  if (!rule) throw new Error('Pass a rule id, e.g. design-doctor ignores add-rule side-tab');
   if (rule === 'overused-font' && !allValues) {
     throw new Error('overused-font is value-specific by default. Use add-value overused-font <font>, or add-rule overused-font --all-values for broad suppression.');
   }
@@ -209,7 +209,7 @@ function addRule(cwd, args) {
 function addFile(cwd, args) {
   const { local, rest } = parseScope(args);
   const glob = String(rest[0] || '').trim();
-  if (!glob) throw new Error('Pass a glob, e.g. impeccable ignores add-file "src/legacy/**"');
+  if (!glob) throw new Error('Pass a glob, e.g. design-doctor ignores add-file "src/legacy/**"');
   const config = readScopeConfig(cwd, local);
   if (!config.ignoreFiles.includes(glob)) config.ignoreFiles.push(glob);
   const target = writeScopeConfig(cwd, config, local);
@@ -257,7 +257,7 @@ function removeFromScopes(cwd, args, remover) {
 function removeRule(cwd, args) {
   return removeFromScopes(cwd, args, (config, rest) => {
     const rule = String(rest[0] || '').trim().toLowerCase();
-    if (!rule) throw new Error('Pass a rule id, e.g. impeccable ignores remove-rule side-tab');
+    if (!rule) throw new Error('Pass a rule id, e.g. design-doctor ignores remove-rule side-tab');
     const before = config.ignoreRules.length;
     config.ignoreRules = config.ignoreRules.filter((entry) => entry !== rule);
     return before - config.ignoreRules.length;
@@ -267,7 +267,7 @@ function removeRule(cwd, args) {
 function removeFile(cwd, args) {
   return removeFromScopes(cwd, args, (config, rest) => {
     const glob = String(rest[0] || '').trim();
-    if (!glob) throw new Error('Pass a glob, e.g. impeccable ignores remove-file "src/legacy/**"');
+    if (!glob) throw new Error('Pass a glob, e.g. design-doctor ignores remove-file "src/legacy/**"');
     const before = config.ignoreFiles.length;
     config.ignoreFiles = config.ignoreFiles.filter((entry) => entry !== glob);
     return before - config.ignoreFiles.length;
@@ -312,7 +312,7 @@ export async function run(args = [], opts = {}) {
   }
   const action = ACTION_ALIASES.get(String(actionArg).toLowerCase());
   if (!action) {
-    throw new Error(`Unknown ignores action: ${actionArg}. Run "impeccable ignores --help".`);
+    throw new Error(`Unknown ignores action: ${actionArg}. Run "design-doctor ignores --help".`);
   }
   const rest = args.slice(1);
   let out;

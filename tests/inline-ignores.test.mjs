@@ -19,22 +19,22 @@ function rules(finding) {
 
 describe('parseInlineIgnores', () => {
   test('whole-file directive collects rules', () => {
-    const d = parseInlineIgnores('/* impeccable-disable overused-font, bounce-easing */');
+    const d = parseInlineIgnores('/* design-doctor-disable overused-font, bounce-easing */');
     expect([...d.file].sort()).toEqual(['bounce-easing', 'overused-font']);
     expect(d.line.size).toBe(0);
     expect(d.nextLine.size).toBe(0);
   });
 
   test('bare directive and explicit * both mean every rule', () => {
-    expect([...parseInlineIgnores('// impeccable-disable').file]).toEqual(['*']);
-    expect([...parseInlineIgnores('// impeccable-disable *').file]).toEqual(['*']);
+    expect([...parseInlineIgnores('// design-doctor-disable').file]).toEqual(['*']);
+    expect([...parseInlineIgnores('// design-doctor-disable *').file]).toEqual(['*']);
   });
 
   test('disable-line targets its own line, disable-next-line targets the line below', () => {
     const content = [
       'a',                                          // line 1
-      'b /* impeccable-disable-line overused-font */', // line 2
-      '// impeccable-disable-next-line side-tab',   // line 3 -> targets line 4
+      'b /* design-doctor-disable-line overused-font */', // line 2
+      '// design-doctor-disable-next-line side-tab',   // line 3 -> targets line 4
       'd',                                          // line 4
     ].join('\n');
     const d = parseInlineIgnores(content);
@@ -43,21 +43,21 @@ describe('parseInlineIgnores', () => {
   });
 
   test('strips eslint -- and biome : reasons from the rule list', () => {
-    expect([...parseInlineIgnores('// impeccable-disable overused-font -- brand font, exported doc').file])
+    expect([...parseInlineIgnores('// design-doctor-disable overused-font -- brand font, exported doc').file])
       .toEqual(['overused-font']);
-    expect([...parseInlineIgnores('# impeccable-disable bounce-easing: intentional bounce').file])
+    expect([...parseInlineIgnores('# design-doctor-disable bounce-easing: intentional bounce').file])
       .toEqual(['bounce-easing']);
   });
 
   test('strips trailing comment closers across syntaxes', () => {
-    expect([...parseInlineIgnores('<!-- impeccable-disable overused-font -->').file]).toEqual(['overused-font']);
-    expect([...parseInlineIgnores('{/* impeccable-disable overused-font */}').file]).toEqual(['overused-font']);
-    expect([...parseInlineIgnores('{# impeccable-disable overused-font #}').file]).toEqual(['overused-font']);
+    expect([...parseInlineIgnores('<!-- design-doctor-disable overused-font -->').file]).toEqual(['overused-font']);
+    expect([...parseInlineIgnores('{/* design-doctor-disable overused-font */}').file]).toEqual(['overused-font']);
+    expect([...parseInlineIgnores('{# design-doctor-disable overused-font #}').file]).toEqual(['overused-font']);
   });
 
   test('directive keyword is case-insensitive (fast-path matches the regex)', () => {
-    expect([...parseInlineIgnores('// Impeccable-Disable overused-font').file]).toEqual(['overused-font']);
-    expect([...parseInlineIgnores('/* IMPECCABLE-DISABLE-LINE side-tab */').line.get(1)]).toEqual(['side-tab']);
+    expect([...parseInlineIgnores('// Design-Doctor-Disable overused-font').file]).toEqual(['overused-font']);
+    expect([...parseInlineIgnores('/* DESIGN-DOCTOR-DISABLE-LINE side-tab */').line.get(1)]).toEqual(['side-tab']);
   });
 
   test('no directive present is a cheap no-op', () => {
@@ -76,16 +76,16 @@ describe('applyInlineIgnores / isInlineIgnored', () => {
   ];
 
   test('whole-file directive drops every matching finding regardless of line', () => {
-    const out = applyInlineIgnores(findings, '/* impeccable-disable overused-font */');
+    const out = applyInlineIgnores(findings, '/* design-doctor-disable overused-font */');
     expect(out.map(rules)).toEqual(['side-tab']);
   });
 
   test('* drops everything', () => {
-    expect(applyInlineIgnores(findings, '// impeccable-disable *')).toEqual([]);
+    expect(applyInlineIgnores(findings, '// design-doctor-disable *')).toEqual([]);
   });
 
   test('line-scoped directive only affects the matching line and rule', () => {
-    const content = ['', '', '', '', 'x /* impeccable-disable-line overused-font */'].join('\n');
+    const content = ['', '', '', '', 'x /* design-doctor-disable-line overused-font */'].join('\n');
     const out = applyInlineIgnores(findings, content);
     // the line-5 overused-font goes; side-tab on line 5 and the line-less one stay
     expect(out.map(rules).sort()).toEqual(['overused-font', 'side-tab']);
@@ -98,7 +98,7 @@ describe('applyInlineIgnores / isInlineIgnored', () => {
   });
 
   test('isInlineIgnored never matches a line-scoped directive for a line-less finding', () => {
-    const d = parseInlineIgnores('x /* impeccable-disable-line overused-font */');
+    const d = parseInlineIgnores('x /* design-doctor-disable-line overused-font */');
     expect(isInlineIgnored({ antipattern: 'overused-font', line: 0 }, d)).toBe(false);
   });
 });
@@ -110,38 +110,38 @@ describe('detectText honors inline directives', () => {
     const flagged = detectText('.a { font-family: Inter; }', 'a.css', opts);
     expect(flagged.some((f) => f.antipattern === 'overused-font')).toBe(true);
 
-    const waived = detectText('.a { font-family: Inter; } /* impeccable-disable-line overused-font */', 'a.css', opts);
+    const waived = detectText('.a { font-family: Inter; } /* design-doctor-disable-line overused-font */', 'a.css', opts);
     expect(waived.some((f) => f.antipattern === 'overused-font')).toBe(false);
   });
 
   test('disable-next-line suppresses the finding on the following line', () => {
-    const content = '/* impeccable-disable-next-line overused-font */\n.a { font-family: Inter; }';
+    const content = '/* design-doctor-disable-next-line overused-font */\n.a { font-family: Inter; }';
     const waived = detectText(content, 'a.css', opts);
     expect(waived.some((f) => f.antipattern === 'overused-font')).toBe(false);
   });
 
   test('whole-file directive suppresses regardless of where the finding is', () => {
-    const content = '/* impeccable-disable overused-font */\n.a {}\n.b { font-family: Inter; }';
+    const content = '/* design-doctor-disable overused-font */\n.a {}\n.b { font-family: Inter; }';
     const waived = detectText(content, 'a.css', opts);
     expect(waived.some((f) => f.antipattern === 'overused-font')).toBe(false);
   });
 
   test('inlineIgnores:false bypasses the directive', () => {
-    const content = '.a { font-family: Inter; } /* impeccable-disable-line overused-font */';
+    const content = '.a { font-family: Inter; } /* design-doctor-disable-line overused-font */';
     const raw = detectText(content, 'a.css', { providers: [], inlineIgnores: false });
     expect(raw.some((f) => f.antipattern === 'overused-font')).toBe(true);
   });
 
   test('line keys align with detector line numbers on CRLF endings', () => {
     // detectText numbers lines with split('\n'); parseInlineIgnores must match.
-    const content = '.a { font-family: Inter; }\r\n.b { font-family: Roboto; } /* impeccable-disable-line overused-font */';
+    const content = '.a { font-family: Inter; }\r\n.b { font-family: Roboto; } /* design-doctor-disable-line overused-font */';
     const out = detectText(content, 'a.css', opts);
     const fonts = out.filter((f) => f.antipattern === 'overused-font').map((f) => f.line);
     expect(fonts).toEqual([1]); // Inter on line 1 stays; Roboto on line 2 is waived
   });
 
   test('a directive for one rule leaves other findings intact', () => {
-    const content = '.a { font-family: Inter; } /* impeccable-disable-line side-tab */';
+    const content = '.a { font-family: Inter; } /* design-doctor-disable-line side-tab */';
     const out = detectText(content, 'a.css', opts);
     expect(out.some((f) => f.antipattern === 'overused-font')).toBe(true);
   });
@@ -159,13 +159,13 @@ describe('detectHtml honors whole-file directives (line-less findings)', () => {
   });
 
   test('whole-file directive in an HTML comment suppresses it', async () => {
-    const file = await writeTmp(page('<!-- impeccable-disable overused-font -- exported brand doc -->'));
+    const file = await writeTmp(page('<!-- design-doctor-disable overused-font -- exported brand doc -->'));
     const waived = await detectHtml(file, { providers: [] });
     expect(waived.some((f) => f.antipattern === 'overused-font')).toBe(false);
   });
 
   test('inlineIgnores:false bypasses it', async () => {
-    const file = await writeTmp(page('<!-- impeccable-disable overused-font -->'));
+    const file = await writeTmp(page('<!-- design-doctor-disable overused-font -->'));
     const raw = await detectHtml(file, { providers: [], inlineIgnores: false });
     expect(raw.some((f) => f.antipattern === 'overused-font')).toBe(true);
   });
@@ -178,7 +178,7 @@ describe('detect CLI end-to-end', () => {
 
   test('inline directive is honored by default, --no-inline-ignores and --no-config bypass it', async () => {
     const file = await writeTmp(
-      '<!DOCTYPE html><html><head><!-- impeccable-disable overused-font -->\n' +
+      '<!DOCTYPE html><html><head><!-- design-doctor-disable overused-font -->\n' +
       '<style>body { font-family: Inter, sans-serif; }</style></head>\n' +
       '<body><p>Paragraph copy for the typography analyzer to read.</p><h1>H</h1><h2>S</h2></body></html>',
       '.html',
@@ -197,7 +197,7 @@ describe('detect CLI end-to-end', () => {
 
 let tmpDir;
 async function writeTmp(content, ext = '.html') {
-  if (!tmpDir) tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-inline-'));
+  if (!tmpDir) tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'design-doctor-inline-'));
   const file = path.join(tmpDir, `f${Math.abs(hash(content))}${ext}`);
   fs.writeFileSync(file, content);
   return file;

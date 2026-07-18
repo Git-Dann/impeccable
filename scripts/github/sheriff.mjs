@@ -32,11 +32,13 @@ export const BLOCKED_LABELS = [
 ];
 
 export const AUTO_MANAGED_LABELS = new Set([...STATE_LABELS, ...BLOCKED_LABELS]);
-export const WARNING_MARKER = '<!-- impeccable-sheriff:stale-warning -->';
-export const CLOSE_MARKER = '<!-- impeccable-sheriff:auto-close -->';
+export const WARNING_MARKER = '<!-- design-doctor-sheriff:stale-warning -->';
+export const CLOSE_MARKER = '<!-- design-doctor-sheriff:auto-close -->';
 
-const DEFAULT_MAINTAINERS = ['pbakaus'];
-const DEFAULT_REGULAR_CONTRIBUTORS = ['pbakaus', 'abdulwahabone'];
+const DEFAULT_MAINTAINERS = ['git-dann'];
+// Placeholder second entry for a trusted non-maintainer contributor — replace
+// with real teammate logins as the fork picks up outside contributors.
+const DEFAULT_REGULAR_CONTRIBUTORS = ['git-dann', 'trusted-contributor'];
 const DEFAULT_EXEMPT_LABELS = ['do not close', 'security'];
 const DEFAULT_TRUSTED_MARKER_AUTHORS = ['github-actions', 'github-actions[bot]'];
 
@@ -371,7 +373,7 @@ export function staleWarningComment(pr, {
     : earliestNewWarningCloseAt);
   return [
     WARNING_MARKER,
-    `Thanks for the PR. Impeccable is moving quickly, and this PR is currently waiting on contributor action.`,
+    `Thanks for the PR. Design Doctor is moving quickly, and this PR is currently waiting on contributor action.`,
     '',
     `It has been waiting for contributor action for ${waitingDays} days. Please address the outstanding review feedback, draft state, or explicit maintainer wait request. PRs that are still waiting on contributor action after ${closeDays} days are closed automatically.`,
     '',

@@ -1,9 +1,9 @@
 /**
- * Build-pipeline emitters for the Impeccable design hook.
+ * Build-pipeline emitters for the Design Doctor design hook.
  *
  * Two emission targets exist:
  *
- * 1. Project-local install (the `npx impeccable skills install` CLI path):
+ * 1. Project-local install (the `npx design-doctor skills install` CLI path):
  *      - Claude Code: `.claude/settings.json`   (${CLAUDE_PROJECT_DIR}-relative)
  *      - Codex:       `.codex/hooks.json`
  *      - Cursor:      `.cursor/hooks.json`
@@ -15,24 +15,24 @@
  *      - `hooks/hooks.json`                     (${PLUGIN_ROOT}-relative)
  *
  * The plugin variant resolves the hook script relative to the installed plugin
- * root rather than assuming a `.claude/skills/impeccable/` layout, so it stays
+ * root rather than assuming a `.claude/skills/design-doctor/` layout, so it stays
  * correct wherever Claude Code unpacks the plugin.
  */
 
-export const IMPECCABLE_HOOK_COMMAND_MARKER = 'skills/impeccable/scripts/hook.mjs';
+export const DESIGN_DOCTOR_HOOK_COMMAND_MARKER = 'skills/design-doctor/scripts/hook.mjs';
 
 const TIMEOUT_SECONDS = 5;
 const STATUS_MESSAGE = 'Checking UI changes';
-const CLAUDE_PROJECT_HOOK = '${CLAUDE_PROJECT_DIR}/.claude/skills/impeccable/scripts/hook.mjs';
-const CLAUDE_PLUGIN_HOOK = '${CLAUDE_PLUGIN_ROOT}/skills/impeccable/scripts/hook.mjs';
-const CODEX_PLUGIN_HOOK = '${PLUGIN_ROOT}/skills/impeccable/scripts/hook.mjs';
-const CODEX_PROJECT_HOOK = '.agents/skills/impeccable/scripts/hook.mjs';
-const CURSOR_BEFORE_EDIT_SCRIPT = '.cursor/skills/impeccable/scripts/hook-before-edit.mjs';
-const GITHUB_PROJECT_HOOK = '$(git rev-parse --show-toplevel)/.github/skills/impeccable/scripts/hook.mjs';
+const CLAUDE_PROJECT_HOOK = '${CLAUDE_PROJECT_DIR}/.claude/skills/design-doctor/scripts/hook.mjs';
+const CLAUDE_PLUGIN_HOOK = '${CLAUDE_PLUGIN_ROOT}/skills/design-doctor/scripts/hook.mjs';
+const CODEX_PLUGIN_HOOK = '${PLUGIN_ROOT}/skills/design-doctor/scripts/hook.mjs';
+const CODEX_PROJECT_HOOK = '.agents/skills/design-doctor/scripts/hook.mjs';
+const CURSOR_BEFORE_EDIT_SCRIPT = '.cursor/skills/design-doctor/scripts/hook-before-edit.mjs';
+const GITHUB_PROJECT_HOOK = '$(git rev-parse --show-toplevel)/.github/skills/design-doctor/scripts/hook.mjs';
 
 export function buildClaudeSettingsManifest() {
   return {
-    description: 'Impeccable design detector: runs after Edit/Write/MultiEdit on UI files and surfaces findings as system reminders.',
+    description: 'Design Doctor design detector: runs after Edit/Write/MultiEdit on UI files and surfaces findings as system reminders.',
     hooks: {
       PostToolUse: [
         {
