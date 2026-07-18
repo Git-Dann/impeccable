@@ -150,22 +150,22 @@ if (remoteTags.split('\n').some((line) => line.endsWith(`refs/tags/${tag}`))) {
 ok('tag is free');
 
 step(`Extracting changelog entry for "${cfg.changelogLabel}${version}"`);
-const changelogSource = path.join(repoRoot, 'site/pages/changelog.astro');
-const changelogHtml = readFileSync(changelogSource, 'utf8');
-const expectedHeader = `<span class="cf-version">${cfg.changelogLabel}${version}</span>`;
-const headerIdx = changelogHtml.indexOf(expectedHeader);
-if (headerIdx === -1) {
-  fail(`No changelog entry found for "${cfg.changelogLabel}${version}" in site/pages/changelog.astro. Add one before releasing.`);
+const changelogSource = path.join(repoRoot, 'CHANGELOG.md');
+if (!existsSync(changelogSource)) fail('CHANGELOG.md not found at repo root.');
+const changelogText = readFileSync(changelogSource, 'utf8');
+// Entries are plain markdown sections: `## {changelogLabel}{version}` followed
+// by `- **Headline.** body` bullets, ending at the next `## ` heading or EOF.
+const headingRe = new RegExp(`^## ${escapeRegExp(cfg.changelogLabel + version)}\\s*$`, 'm');
+const headingMatch = headingRe.exec(changelogText);
+if (!headingMatch) {
+  fail(`No changelog entry found for "${cfg.changelogLabel}${version}" in CHANGELOG.md. Add a "## ${cfg.changelogLabel}${version}" section before releasing.`);
 }
-// Notes are the entry's bullet list. Scoping to <ul class="cf-items">
-// skips the optional lead paragraph, before/after figure, and stat row
-// that the headline release (v3.5.0) carries, so release notes stay clean.
-const listStart = changelogHtml.indexOf('<ul class="cf-items">', headerIdx);
-const listEnd = changelogHtml.indexOf('</ul>', listStart);
-if (listStart === -1 || listEnd === -1) fail('Changelog entry markup is malformed.');
-const entryHtml = changelogHtml.slice(listStart, listEnd + '</ul>'.length);
-
-const notes = htmlToMarkdown(entryHtml);
+const bodyStart = headingMatch.index + headingMatch[0].length;
+const rest = changelogText.slice(bodyStart);
+const nextHeadingMatch = /^## /m.exec(rest);
+const bodyEnd = nextHeadingMatch ? bodyStart + nextHeadingMatch.index : changelogText.length;
+const notes = changelogText.slice(bodyStart, bodyEnd).trim();
+if (!notes) fail('Changelog entry is empty.');
 ok('extracted');
 
 step('Verifying release artifacts exist');
@@ -209,41 +209,29 @@ if (cfg.postReleaseHint) {
   console.log(`\n→ Next step: ${cfg.postReleaseHint}`);
 }
 
-const tweet = renderTweet(cfg, version, entryHtml, tag);
+const tweet = renderTweet(cfg, version, notes, tag);
 console.log(`\n--- Tweet (${tweet.length}/${TWEET_LIMIT} chars) for @design_doctor_ai ---`);
 console.log(tweet);
 console.log('--- end tweet ---');
 
-// Pull the bold lead text from each changelog bullet. Each <li> reads
-// "<strong>Headline.</strong> Body...", so the strong text alone is a
-// tweet-grade summary. Returns a list ordered by appearance.
-function extractHighlights(entryHtml) {
+// Pull the bold lead text from each changelog bullet. Each bullet reads
+// "- **Headline.** Body...", so the bold text alone is a tweet-grade
+// summary. Returns a list ordered by appearance.
+function extractHighlights(notes) {
   const highlights = [];
-  const liRe = /<li>([\s\S]*?)<\/li>/g;
+  const bulletRe = /^-\s+\*\*(.+?)\*\*/gm;
   let match;
-  while ((match = liRe.exec(entryHtml))) {
-    const strong = match[1].match(/<strong>([\s\S]*?)<\/strong>/);
-    if (!strong) continue;
-    const text = strong[1]
-      .replace(/<[^>]+>/g, '')
-      .replace(/&times;/g, '×')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
-      .replace(/[.!?]+\s*$/, '')
-      .trim();
+  while ((match = bulletRe.exec(notes))) {
+    const text = match[1].replace(/\s+/g, ' ').replace(/[.!?]+\s*$/, '').trim();
     if (text) highlights.push(text);
   }
   return highlights;
 }
 
-function renderTweet(cfg, version, entryHtml, tag) {
+function renderTweet(cfg, version, notes, tag) {
   const releaseUrl = `${REPO_URL}/releases/tag/${tag}`;
   const header = cfg.tweetHeader(version);
-  const highlights = extractHighlights(entryHtml);
+  const highlights = extractHighlights(notes);
   const tail = [cfg.tweetCta, releaseUrl].filter(Boolean).join('\n');
 
   // Greedy: include as many highlights as fit. Always include the URL.
@@ -263,22 +251,6 @@ function renderTweet(cfg, version, entryHtml, tag) {
   return [header, '', bullets.trimEnd(), '', tail].join('\n');
 }
 
-function htmlToMarkdown(html) {
-  let md = html;
-  md = md.replace(/<div class="changelog-version-header"[\s\S]*?<\/div>/, '');
-  md = md.replace(/<li>([\s\S]*?)<\/li>/g, (_, inner) => `- ${inner.trim()}\n`);
-  md = md.replace(/<strong>([\s\S]*?)<\/strong>/g, '**$1**');
-  md = md.replace(/<code>([\s\S]*?)<\/code>/g, '`$1`');
-  md = md.replace(/<a\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '[$2]($1)');
-  md = md.replace(/<\/?(ul|div|span)[^>]*>/g, '');
-  md = md.replace(/&times;/g, '×');
-  md = md.replace(/&amp;/g, '&');
-  md = md.replace(/&lt;/g, '<');
-  md = md.replace(/&gt;/g, '>');
-  md = md.replace(/&quot;/g, '"');
-  md = md.replace(/&#39;/g, "'");
-  md = md.replace(/^[ \t]+/gm, '');
-  md = md.replace(/[ \t]+\n/g, '\n');
-  md = md.replace(/\n{3,}/g, '\n\n');
-  return md.trim();
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
